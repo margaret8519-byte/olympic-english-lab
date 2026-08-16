@@ -1,0 +1,2 @@
+import {CheckCircle2} from "lucide-react";
+export default function RequiredAspects({aspects,compact=false}:{aspects:string[];compact?:boolean}){return <section className={`required-aspects ${compact?"compact":""}`}><h2>Что нужно раскрыть</h2><ol>{aspects.map(a=><li key={a}><CheckCircle2/>{a}</li>)}</ol>{!compact&&<div className="speaking-reminder">Make an introduction and a conclusion. Speak freely. Do not read the notes.</div>}</section>}

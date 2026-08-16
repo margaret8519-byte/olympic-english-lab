@@ -1,0 +1,1 @@
+export default function ProgressCircle({value,color="#1689f8",size=76}:{value:number;color?:string;size?:number}){return <div className="progress-circle" style={{"--p":`${value*3.6}deg`,"--c":color,width:size,height:size} as React.CSSProperties}><span>{value}%</span></div>}

@@ -1,0 +1,2 @@
+import {BookOpenCheck} from "lucide-react";import type {FactFileSection} from "@/data/speaking/2022/types";
+export default function FactFile({sections}:{sections:FactFileSection[]}){return <section className="fact-file"><header><BookOpenCheck/><div><small>OFFICIAL MATERIAL</small><h2>Moscow Zoo · Fact File</h2></div></header><div className="fact-grid">{sections.map(s=><article key={s.title}><h3>{s.title}</h3><p>{s.content}</p></article>)}</div></section>}

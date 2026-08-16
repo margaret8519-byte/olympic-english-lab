@@ -1,0 +1,3 @@
+"use client";
+import Link from"next/link";import{useRouter}from"next/navigation";import{createClient}from"@/lib/supabase/client";
+export default function TeacherShell({name,children}:{name:string;children:React.ReactNode}){const router=useRouter();async function logout(){await createClient().auth.signOut();router.replace("/teacher/login");router.refresh()}return <main className="teacher-workspace"><header><Link href="/teacher"><b>OLYMPIC ENGLISH LAB</b><span>Teacher Workspace</span></Link><nav><Link href="/teacher">Обзор</Link><Link href="/teacher/classes">Классы</Link><Link href="/teacher/writing">Writing</Link><Link href="/teacher/speaking">Speaking</Link></nav><div><span>{name}</span><button onClick={logout}>Выйти</button></div></header>{children}</main>}

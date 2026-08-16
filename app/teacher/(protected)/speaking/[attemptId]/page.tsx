@@ -1,0 +1,1 @@
+import{TeacherSpeakingReview}from"@/components/teacher/TeacherSpeakingViews";export default async function Page({params}:{params:Promise<{attemptId:string}>}){const{attemptId}=await params;return <TeacherSpeakingReview attemptId={attemptId}/>}

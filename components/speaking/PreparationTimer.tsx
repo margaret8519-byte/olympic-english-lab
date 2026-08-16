@@ -1,0 +1,3 @@
+"use client";import {useEffect,useState} from "react";import {Clock3,FastForward} from "lucide-react";
+const fmt=(n:number)=>`${String(Math.floor(n/60)).padStart(2,"0")}:${String(n%60).padStart(2,"0")}`;
+export default function PreparationTimer({seconds,onDone}:{seconds:number;onDone:()=>void}){const [left,setLeft]=useState(seconds);useEffect(()=>{if(left<=0)return;const id=setTimeout(()=>setLeft(v=>v-1),1000);return()=>clearTimeout(id)},[left]);return <div className="prep-timer"><Clock3/><small>Официальное время</small><strong>{fmt(left)}</strong><span>{left?"Подготовка идёт":"Время подготовки завершено"}</span><button className="speaking-primary" onClick={onDone}><FastForward/>{left?"Я готов начать раньше":"Начать Speaking"}</button></div>}
