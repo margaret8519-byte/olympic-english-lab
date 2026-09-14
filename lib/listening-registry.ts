@@ -16,7 +16,7 @@ const registry:Record<9|10|11,SafeListeningGroup[]>={
 export const disabledListeningGroups:DisabledListeningGroup[]=[
  {grade:9,year:2022,reason:"missing-audio",audioSource:null},{grade:9,year:2023,reason:"missing-key",audioSource:"source_materials/grade-9/2023/listening.mp3"},{grade:9,year:2024,reason:"audio-transcript-mismatch",audioSource:"source_materials/grade-9/2024/listening.mp3"},
  {grade:10,year:2022,reason:"missing-audio",audioSource:null},{grade:10,year:2023,reason:"missing-key",audioSource:"source_materials/grade-10/2023/listening.mp3"},{grade:10,year:2024,reason:"audio-transcript-mismatch",audioSource:"public/audio/grade-10/2024/listening.mp3"},
- {grade:11,year:2022,reason:"missing-audio",audioSource:null},{grade:11,year:2023,reason:"missing-key",audioSource:"source_materials/grade-11/2023/listening.mp3"},{grade:11,year:2024,reason:"missing-audio",audioSource:null},
+ {grade:11,year:2022,reason:"missing-audio",audioSource:null},{grade:11,year:2023,reason:"missing-key",audioSource:"source_materials/grade-11/2023/11_аудиозапись_для_конкурса_понимания_устной_речи.mp3"},{grade:11,year:2024,reason:"missing-audio",audioSource:null},
 ];
 
 export function validatedListeningGroupsForGrade(grade:number):SafeListeningGroup[]{return registry[grade as 9|10|11]||[]}
