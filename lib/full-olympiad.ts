@@ -15,7 +15,7 @@ export const FULL_SECTION_ORDER=["listening","reading","use-of-english","writing
 export type FullSection=typeof FULL_SECTION_ORDER[number];
 export type FullQuestion=QuestionBankItem&{options:string[]};
 export type FullHistory=Record<string,{seen:number;incorrect:number}>;
-export type FullSession={version:1;id:string;grade:number;startedAt:string;sectionIndex:number;questionIds:Record<Exclude<FullSection,"writing">,string[]>;listeningGroupId:string;writingTaskId?:string;answers:Record<string,string>;writingText:string;completedAt?:string;writingStatus?:"pending"|"reviewed";writingReview?:{score:number;maxScore:number;comment?:string|null}};
+export type FullSession={version:1;id:string;grade:number;startedAt:string;sectionIndex:number;questionIds:Record<Exclude<FullSection,"writing">,string[]>;listeningGroupId?:string;writingTaskId?:string;answers:Record<string,string>;writingText:string;completedAt?:string;writingStatus?:"pending"|"reviewed";writingReview?:{score:number;maxScore:number;comment?:string|null}};
 export const FULL_ACTIVE_KEY="olympic-full-olympiad-active-v1";
 export const FULL_HISTORY_KEY="olympic-full-olympiad-history-v1";
 export const FULL_LAST_IDS_KEY="olympic-full-olympiad-last-ids-v1";
@@ -46,19 +46,22 @@ export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSect
   const selected:FullQuestion[]=[];for(const unit of units){selected.push(...unit.items);if(selected.length>=target)break}return selected;
 }
 
+const firstFullSectionIndex=(ids:FullSession["questionIds"])=>ids.listening.length?0:1;
+export function nextFullSectionIndex(session:FullSession,from=session.sectionIndex){for(let index=from+1;index<FULL_SECTION_ORDER.length;index++){const section=FULL_SECTION_ORDER[index];if(section==="writing")return index;if((session.questionIds[section]||[]).length)return index}return from}
+
 export function createFullSession(grade:number,history:FullHistory={},lastIds:string[]=[],random?:()=>number,now=new Date().toISOString()):FullSession{
-  const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id),{objective,listeningGroups,writings}=fullBankForGrade(grade),ids={} as FullSession["questionIds"],lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value)),listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
-  if(!listeningGroup)throw new Error(`No validated ListeningGroup for grade ${grade}`);ids.listening=listeningGroup.questions.map(question=>question.id);
+  const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id),{objective,listeningGroups,writings}=fullBankForGrade(grade),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value)),listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
+  if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
   for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(objective,section,history,lastIds,10,rng).map(q=>q.id);
   const last=new Set(lastIds),writing=[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
-  return{version:1,id,grade,startedAt:now,sectionIndex:0,questionIds:ids,listeningGroupId:listeningGroup.id,writingTaskId:writing?.id,answers:{},writingText:""};
+  return{version:1,id,grade,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
 export function resolveSessionWriting(session:FullSession){const bank=fullBankForGrade(session.grade);return bank.writings.find(task=>task.id===session.writingTaskId)||bank.writing}
 
 export function updateFullHistory(history:FullHistory,questions:FullQuestion[],answers:Record<string,string>,isCorrect:(q:FullQuestion,a:string)=>boolean){const next={...history};for(const q of questions){const old=next[q.id]||{seen:0,incorrect:0},correct=isCorrect(q,answers[q.id]||"");next[q.id]={seen:old.seen+1,incorrect:old.incorrect+(correct?0:1)}}return next}
-export function resolveFullListeningGroup(session:FullSession):ListeningGroup|null{const group=fullBankForGrade(session.grade).listeningGroups.find(candidate=>candidate.id===session.listeningGroupId);return group&&session.questionIds.listening.length===group.questions.length&&session.questionIds.listening.every((id,index)=>id===group.questions[index].id)?group:null}
-export function isResumableFullSession(session:FullSession|null|undefined,grade:number):session is FullSession{return!!session&&session.grade===grade&&!session.completedAt&&!!resolveFullListeningGroup(session)}
-export function resolveSessionQuestions(session:FullSession){const bank=fullBankForGrade(session.grade),map=new Map([...bank.objective,...bank.listeningGroups.flatMap(group=>group.questions)].map(q=>[q.id,q]));return FULL_SECTION_ORDER.slice(0,3).flatMap(section=>session.questionIds[section as keyof FullSession["questionIds"]].map(id=>map.get(id)).filter(Boolean)) as FullQuestion[]}
+export function resolveFullListeningGroup(session:FullSession):ListeningGroup|null{if(!session.listeningGroupId)return null;const ids=session.questionIds.listening||[],group=fullBankForGrade(session.grade).listeningGroups.find(candidate=>candidate.id===session.listeningGroupId);return group&&ids.length===group.questions.length&&ids.every((id,index)=>id===group.questions[index].id)?group:null}
+export function isResumableFullSession(session:FullSession|null|undefined,grade:number):session is FullSession{if(!session||session.grade!==grade||session.completedAt)return false;const hasListening=(session.questionIds.listening||[]).length>0;return hasListening||session.listeningGroupId?!!resolveFullListeningGroup(session):true}
+export function resolveSessionQuestions(session:FullSession){const bank=fullBankForGrade(session.grade),map=new Map([...bank.objective,...bank.listeningGroups.flatMap(group=>group.questions)].map(q=>[q.id,q]));return FULL_SECTION_ORDER.slice(0,3).flatMap(section=>(session.questionIds[section as keyof FullSession["questionIds"]]||[]).map(id=>map.get(id)).filter(Boolean)) as FullQuestion[]}
 export function isSupportedFullGrade(grade:number){return[7,8,9,10,11].includes(grade)}
 export type {Section,QuestionSet};
