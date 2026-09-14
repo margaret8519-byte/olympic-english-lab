@@ -1,4 +1,5 @@
 import type { AdaptiveQuestion } from "../../data/questions/grade-7-8/original/index.ts";
+import type { Section } from "../../data/questions/types.ts";
 import type { TrainingMode } from "../adaptive-training.ts";
 import { createClient } from "./client.ts";
 
@@ -8,7 +9,9 @@ export type CompletedAttemptInput = {
   attemptId: string;
   startedAt: string;
   completedAt: string;
-  mode: TrainingMode;
+  mode: TrainingMode|"official";
+  section?: Section|"speaking"|null;
+  source?: string;
   grade: number;
   questions: AdaptiveQuestion[];
   answers: Record<string,string>;
@@ -23,7 +26,7 @@ type SupabaseClient = ReturnType<typeof createClient>;
 const isCorrect=(question:AdaptiveQuestion,answer:string)=>question.acceptedAnswers.includes(answer.trim().toLowerCase());
 export const resultFor=(input:CompletedAttemptInput)=>{const correct=input.questions.filter(question=>isCorrect(question,input.answers[question.id]||"")).length,max=input.questions.length;return{correct,incorrect:max-correct,max,percentage:max?Math.round(correct/max*100):0}};
 
-export function buildAttemptPayload(input:CompletedAttemptInput,studentId:string){const result=resultFor(input);return{id:input.attemptId,student_id:studentId,mode:input.mode==="weak"?"adaptive":input.mode,section:null,source:"original-olympic-english-lab",started_at:input.startedAt,completed_at:input.completedAt,score:result.correct,max_score:result.max,percentage:result.percentage,total_questions:result.max,correct_answers:result.correct,incorrect_answers:result.incorrect,weak_subskill:input.weakSubskill,metadata:{grade:input.grade,primaryWeakSubskill:input.weakSubskill}}}
+export function buildAttemptPayload(input:CompletedAttemptInput,studentId:string){const result=resultFor(input);return{id:input.attemptId,student_id:studentId,mode:input.mode==="weak"?"adaptive":input.mode,section:input.section??null,source:input.source??"original-olympic-english-lab",started_at:input.startedAt,completed_at:input.completedAt,score:result.correct,max_score:result.max,percentage:result.percentage,total_questions:result.max,correct_answers:result.correct,incorrect_answers:result.incorrect,weak_subskill:input.weakSubskill,metadata:{grade:input.grade,primaryWeakSubskill:input.weakSubskill}}}
 export function buildAnswerPayloads(input:CompletedAttemptInput,studentId:string){return input.questions.map(question=>{const correct=isCorrect(question,input.answers[question.id]||"");return{attempt_id:input.attemptId,student_id:studentId,question_id:question.id,section:question.section,skill:question.skill,subskill:question.subskill,answer_text:input.answers[question.id]||"",is_correct:correct,points:correct?question.points:0,max_points:question.points}})}
 
 export function readPending(storage:StorageLike):PendingAttempt[]{try{return JSON.parse(storage.getItem(PENDING_SYNC_KEY)||"[]") as PendingAttempt[]}catch{return[]}}
