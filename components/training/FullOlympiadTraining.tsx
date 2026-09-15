@@ -5,7 +5,7 @@ import{validatedListeningGroupsForGrade}from"@/lib/listening-registry";
 const labels={listening:"Listening",reading:"Reading","use-of-english":"Use of English",writing:"Writing"}as const;
 const read=<T,>(key:string,fallback:T):T=>{try{return JSON.parse(localStorage.getItem(key)||"")as T}catch{return fallback}};
 const words=(text:string)=>text.trim()?text.trim().split(/\s+/).length:0;
-function optionValue(option:string){return option.match(/^[A-E](?=\s|$)/i)?.[0].toLowerCase()||option}
+function optionValue(option:string){return option.match(/^[A-F](?=\s|$)/i)?.[0].toLowerCase()||option}
 // The post-mount storage read intentionally keeps the server render deterministic.
 // eslint-disable-next-line react-hooks/set-state-in-effect
 export default function FullOlympiadTraining(){const profile=useProfile(),grade=Number(profile.grade),listeningAvailable=grade<9||validatedListeningGroupsForGrade(grade).length>0,[session,setSession]=useState<FullSession|null>(null),[ready,setReady]=useState(false),[error,setError]=useState(""),[submitting,setSubmitting]=useState(false);useEffect(()=>{const stored=read<FullSession|null>(FULL_ACTIVE_KEY,null);setSession(isResumableFullSession(stored,grade)?stored:null);setReady(true)},[grade]);useEffect(()=>{if(session&&!session.completedAt)localStorage.setItem(FULL_ACTIVE_KEY,JSON.stringify(session));else localStorage.removeItem(FULL_ACTIVE_KEY)},[session]);
