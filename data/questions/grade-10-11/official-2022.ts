@@ -89,20 +89,44 @@ export const grade11Listening2022Verified = set("g11-2022-listening", "Listening
   script: "source_materials/grade-11/2022/script_52_1668763504.pdf",
 });
 
-const cincoAnswers = ["benefit", "representative", "highlight", "government", "respectively", "showcases", "commemorates", "annually", "significance", "delicacies"];
-const photoOptions = [
-  ["A appeal", "B taste", "C interest", "D attraction"],
-  ["A rejected", "B contradicted", "C denied", "D refused"],
-  ["A trouble", "B care", "C effort", "D concern"],
-  ["A characteristics", "B forms", "C qualities", "D aspects"],
-  ["A seize", "B capture", "C grab", "D catch"],
-  ["A motivates", "B renews", "C stimulates", "D reacts"],
-  ["A manage", "B succeed", "C achieve", "D reach"],
-  ["A reason", "B cause", "C source", "D means"],
-  ["A glance", "B see", "C stare", "D look"],
-  ["A utterly", "B completely", "C fully", "D absolutely"],
+const cincoDefinitions = [
+  "get help or an advantage from something",
+  "typical of, or the same as, others in a larger group of people or things",
+  "describe something in a way that makes people notice it and think about it",
+  "the offices, departments, and groups of people that control a country, state, city, or other political unit",
+  "in a way that relates or belongs to each of the separate people or things you have just mentioned",
+  "shows the best qualities or parts of something",
+  "serves as a memorial of something",
+  "happening every year",
+  "the importance that something has because it affects other things",
+  "something especially rare or expensive that is good to eat",
 ];
-const seniorPhotoAnswers = ["c", "b", "b", "a", "d", "b", "c", "b", "a", "d"];
+const cincoAnswers = ["benefit", "representative", "highlight", "government", "respectively", "showcases", "commemorates", "annually", "significance", "delicacies"];
+const athleteOptions = [
+  ["A complete", "B finish", "C achieve", "D succeed"],
+  ["A admit", "B accept", "C reject", "D refuse"],
+  ["A controlled", "B conducted", "C directed", "D guided"],
+  ["A exceed", "B overtake", "C pass", "D overcome"],
+  ["A outlook", "B view", "C estimate", "D prospect"],
+  ["A opposition", "B contrast", "C distinction", "D contradiction"],
+  ["A thin", "B tight", "C narrow", "D slight"],
+  ["A habit", "B trend", "C custom", "D inclination"],
+  ["A extent", "B amount", "C range", "D level"],
+  ["A review", "B wonder", "C consider", "D reflect"],
+];
+const athleteAnswers = ["c", "b", "b", "a", "d", "b", "c", "b", "a", "d"];
+const athletePrompts = [
+  "Every aspiring athlete hopes to ___ their dream of winning a gold medal at the Olympics.",
+  "Often talented athletes must ___ second place.",
+  "A team of psychologists recently ___ some research on the emotional responses of those finishing second.",
+  "For certain individuals, a silver medal may ___ their expectations.",
+  "They may surprise experts who believed they had absolutely no ___ of achieving anything.",
+  "In ___, the athlete who everyone assumed would win may not celebrate their silver medal.",
+  "The favourite may suffer a ___ defeat.",
+  "There is a ___ in the research showing that an athlete who finishes a long way behind the winner can feel happier.",
+  "To a certain ___, these findings are not surprising.",
+  "Silver medalists who were close to victory will almost certainly ___ on what might have happened.",
+];
 const cultureStatements = [
   "The British Parliament consists of the House of Lords and the House of Representatives.",
   "Australia Day is celebrated on 26 January, in winter.",
@@ -118,22 +142,22 @@ const cultureStatements = [
 const cultureAnswers = ["f", "f", "t", "t", "t", "f", "f", "f", "t", "f"];
 const idiomPrompts = [
   "Baby Jessica is the ___ of her father's eye.",
-  "Angelo is a hard ___ to crack.",
-  "Working at the library lets me have my ___ and eat it too.",
+  "Angelo is a hard ___ to crack when something is bothering him.",
+  "Working at the university library lets me have my ___ and eat it too.",
   "That’s the way the ___ crumbles.",
   "I was as cool as a ___ all the way to England.",
   "My Granny is always full of ___.",
   "Opera isn't exactly my cup of ___.",
   "He is definitely the ___ of the crop.",
-  "Don't put all of your ___ in one basket.",
-  "Any teacher worth his ___ can inspire students.",
+  "I shouldn't put all of my ___ in one basket.",
+  "Any teacher worth their ___ is able to inspire their students.",
 ];
 const idiomAnswers = ["apple", "nut", "cake", "cookie", "cucumber", "beans", "tea", "cream", "eggs", "salt"];
 
 function seniorUseOfEnglish(grade: Grade): QuestionSet {
   const items: QuestionBankItem[] = [];
-  cincoAnswers.forEach((answer, index) => items.push(item(grade, "use-of-english", String(index + 1).padStart(2, "0"), `Complete the Cinco de Mayo crossword gap ${index + 1}.`, [], answer, "crossword vocabulary", { groupId: `g${grade}-2022-uoe-cinco` })));
-  photoOptions.forEach((options, index) => items.push(item(grade, "use-of-english", String(index + 11), `Choose the best word for gap ${index + 11} in “The joy of photography”.`, options, seniorPhotoAnswers[index], "lexico-grammatical cloze", { groupId: `g${grade}-2022-uoe-photography` })));
+  cincoDefinitions.forEach((definition, index) => items.push(item(grade, "use-of-english", String(index + 1).padStart(2, "0"), `Crossword clue ${index + 1}: ${definition}.`, [], cincoAnswers[index], "crossword vocabulary", { groupId: `g${grade}-2022-uoe-cinco` })));
+  athleteOptions.forEach((options, index) => items.push(item(grade, "use-of-english", String(index + 11), athletePrompts[index], options, athleteAnswers[index], "lexico-grammatical cloze", { groupId: `g${grade}-2022-uoe-athletes` })));
   cultureStatements.forEach((text, index) => items.push(item(grade, "use-of-english", String(index + 21), text, ["T", "F"], cultureAnswers[index], "cultural knowledge", { groupId: `g${grade}-2022-uoe-culture`, type: "true-false" })));
   idiomPrompts.forEach((text, index) => items.push(item(grade, "use-of-english", String(index + 31), text, [], idiomAnswers[index], "food idioms", { groupId: `g${grade}-2022-uoe-idioms` })));
   return set(`g${grade}-2022-use-of-english`, "Use of English", "use-of-english", items);
