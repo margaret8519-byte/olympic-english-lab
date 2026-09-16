@@ -1,4 +1,5 @@
-import { grade10Listening2022, grade11Listening2022 } from "../data/questions/grade-10-11/index.ts";
+import { grade10Listening2022 } from "../data/questions/grade-10-11/index.ts";
+import { grade11Listening2022Verified } from "../data/questions/grade-10-11/official-2022.ts";
 import { listeningGroupsFromSets, type ListeningGroup } from "./standalone-training.ts";
 
 export type SafeListeningGroup = ListeningGroup & { audioSrc: string; audioMode: "file"; script: string; validation: { status: "safe"; playback: "source-mp3"; transcriptSource: string; taskSource: string; keySource: string; audioSource: string; audioSha256: string } };
@@ -45,7 +46,7 @@ const registry: Record<9 | 10 | 11, SafeListeningGroup[]> = {
     audioSource: "https://reg.storage.yandexcloud.net/public/olymp_tasks/audio_52_1755785414.7z#10",
     audioSha256: "6C2841D41B6B893202A48A460503947D93C97DF6A6F9D3D3778E12F36F05D597",
   })],
-  11: [safeListeningGroup(listeningGroupsFromSets([grade11Listening2022], 11)[0], {
+  11: [safeListeningGroup(listeningGroupsFromSets([grade11Listening2022Verified], 11)[0], {
     status: "safe",
     playback: "source-mp3",
     transcriptSource: "source_materials/grade-11/2022/script_52_1668763504.pdf",
