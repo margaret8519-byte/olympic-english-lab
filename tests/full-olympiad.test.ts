@@ -50,3 +50,28 @@ test("final review explains contradictory by meaning in context",()=>{const ques
 test("final review explains not as as parallel contrast",()=>{const question=reviewQuestion({id:"u7",subskill:"Open cloze",type:"open-short-answer",text:"Memory should be treated as evidence, ___ as a perfect record.",options:[],acceptedAnswers:["not"],explanation:"The correlative structure is not as."}),review=reviewFor(question,"as");assert.match(review.mistakeReason,/as evidence.*perfect record/);assert.match(review.correctReason,/as evidence, not as a perfect record/);assert.match(review.correctReason,/Память следует рассматривать как свидетельство/);assert.doesNotMatch(review.correctReason,/correlative structure/i);noGeneric(review.mistakeReason);noGeneric(review.correctReason)});
 
 test("final review explains vocabulary and collocation choices",()=>{const question=reviewQuestion({id:"u8",subskill:"Vocabulary and collocation",text:"Choose the best phrase for the context.",options:["A make a decision","B do a decision"],acceptedAnswers:["a"]}),review=reviewFor(question,"b");assert.match(review.mistakeReason,/decision.*make|make.*decision/);assert.match(review.correctReason,/make a decision.*устойчивое сочетание/);assert.equal(review.evidence,undefined);noGeneric(review.mistakeReason);noGeneric(review.correctReason)});
+
+const reviewFromBank=(grade:10|11,predicate:(question:FullQuestion)=>boolean,answer:string)=>{const bank=fullBankForGrade(grade).objective,question=bank.find(predicate);assert.ok(question,"question must exist in full bank");const groupId=question.groupId||question.id,questions=bank.filter(item=>(item.groupId||item.id)===groupId),answers=Object.fromEntries(questions.map(item=>[item.id,item.id===question.id?answer:"__wrong__"]));return buildFullQuestionReviews(questions,answers,(q,a)=>checkAnswer(q,a)===true).find(item=>item.id===question.id)!};
+const assertDistinctReviewBlocks=(review:ReturnType<typeof reviewFor>)=>{assert.notEqual(review.mistakeReason,review.correctReason);assert.notEqual(review.mistakeReason,review.rule);assert.notEqual(review.correctReason,review.rule)};
+
+test("Reading reason question about careful positioning is not treated as reference",()=>{const review=reviewFromBank(10,q=>q.text==="Why did cases still need careful positioning?","b");assert.doesNotMatch(review.rule,/latter|former|reference words/i);assert.match(review.rule,/reason|cause|причин|следств|услов/i);assert.match(review.evidence||"",/still needed light and careful positioning/i);assert.match(review.correctReason,/light|access/i)});
+
+test("specified Reading questions use concrete evidence and non-reference strategies",()=>{const checks=["Why do historians value the damaged books?","What problem did the glazed case solve?","What unintended effect is described?"];for(const text of checks){const review=reviewFromBank(10,q=>q.text===text,"a");assert.doesNotMatch(review.rule,/latter|former|reference words/i);assert.ok(review.evidence);assert.doesNotMatch(review.correctReason,/Для этого задания пока нет подробного объяснения/)}});
+
+test("specified Use of English cases have concrete non-duplicated explanations",()=>{const cases:[string,string,RegExp[]][]=[
+["They had to ___ the afternoon survey until conditions improved.","d",[/give in|сдаться|уступить/i,/put off|postpone|отлож/i]],
+["The telescope made it possible to observe ___ phenomenon invisible to the naked eye.","c",[/the/i,/a phenomenon|first|впервые|исчисляем/i]],
+["The data is incomplete. ___, no firm conclusion should be drawn.","b",[/Meanwhile|тем временем/i,/Consequently|result|следств/i]],
+["The experiment ___ doubt on the accepted diagram.","b",[/did/i,/cast doubt on|сомнен/i]],
+["They must ___ a balance between control and spontaneity.","c",[/balance/i,/strike a balance|баланс/i]],
+["Her conclusion is fully consistent ___ the evidence presented.","a",[/consistent/i,/with/i]],
+["The speaker ___ an important distinction between correlation and cause.","b",[/point/i,/point out|указать|подчерк/i]],
+["The community, ___ representatives joined the research team, retained ownership.","a",[/whose|representatives/i,/принадлеж|ownership|of which/i]],
+["The agreement was presented as a ___ rather than a victory for one side.","b",[/settlement|agreement|урегулир/i,/victory|one side|побед/i]]
+];for(const [text,answer,patterns] of cases){const review=reviewFromBank(10,q=>q.text===text,answer);assertDistinctReviewBlocks(review);for(const pattern of patterns)assert.ok(pattern.test(review.mistakeReason)||pattern.test(review.correctReason)||pattern.test(review.rule),text+" should mention "+pattern)}});
+
+test("word formation explanations cover CONSIST ACCESS and DECEIVE details",()=>{const cases:[string,string,RegExp[]][]=[
+["The measurements remained surprisingly ___. (CONSIST)","consistency",[/CONSIST.*consistent/i,/требуется прилагательное|adjective/i,/consistency/i]],
+["Free tickets improved the event's ___. (ACCESS)","accessible",[/ACCESS.*accessibility/i,/требуется существительное|noun/i,/accessible/i]],
+["The device's apparent simplicity is ___. (DECEIVE)","deceivingly",[/DECEIVE.*deceptive/i,/требуется прилагательное|adjective/i,/deceivingly/i]]
+];for(const [text,answer,patterns] of cases){const review=reviewFromBank(10,q=>q.text===text,answer);assertDistinctReviewBlocks(review);for(const pattern of patterns)assert.ok(pattern.test(review.mistakeReason)||pattern.test(review.correctReason)||pattern.test(review.rule),text+" should mention "+pattern)}});

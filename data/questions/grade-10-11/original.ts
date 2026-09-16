@@ -10,7 +10,7 @@ const language:Record<Grade,Choice[]>={
 ["01","Conditionals","If the committee ___ earlier, the misunderstanding could have been avoided.","had acted|acted|would act|has acted","a","The third conditional uses had + past participle."],
 ["02","Reported speech","Maya denied ___ the confidential document.","to copy|having copied|copy|to have copy","b","Deny is followed by a gerund."],
 ["03","Verb forms","The expedition is believed ___ the summit before the storm began.","to reach|to have reached|reaching|having reach","b","A prior action requires the perfect infinitive."],
-["04","Articles","The telescope made it possible to observe ___ phenomenon invisible to the naked eye.","a|an|the|—","a","The phenomenon is introduced for the first time."],
+["04","Articles","The telescope made it possible to observe ___ phenomenon invisible to the naked eye.","a|an|the|—","a","A phenomenon is introduced for the first time. The would imply that the phenomenon is already known or has already been mentioned."],
 ["05","Prepositions","Her conclusion is fully consistent ___ the evidence presented.","to|with|for|at","b","Прилагательное consistent управляет предлогом with: be consistent with something. Здесь conclusion согласуется именно with the evidence presented."],
 ["06","Collocations","The discovery ___ serious doubt on the accepted explanation.","threw|cast|made|put","b","Cast doubt on — устойчивое сочетание «поставить под сомнение». Варианты made/put/threw не образуют эту collocation в данном предложении."],
 ["07","Phrasal verbs","The researchers had to ___ the experiment when the cooling system failed.","call off|take after|bring up|set aside","a","Call off means cancel."],
@@ -26,7 +26,7 @@ const language:Record<Grade,Choice[]>={
 ["17","Verb patterns","We would rather the announcement ___ until everyone had arrived.","was delayed|is delayed|will delay|has delayed","a","Would rather + subject takes a past form."],
 ["18","Prepositions","The proposal was rejected ___ the grounds that it lacked evidence.","in|at|on|by","c","On the grounds that — устойчивое выражение «на том основании, что». Поэтому proposal was rejected on the grounds that it lacked evidence."],
 ["19","Word formation","The device's apparent simplicity is ___. (DECEIVE)","deceived|deceitful|deceptive|deceivingly","c","DECEIVE → deceptive: после is требуется adjective. Deceptive означает «обманчивый»: устройство кажется простым, но эта простота вводит в заблуждение."],
-["20","Linking devices","The data is incomplete. ___, no firm conclusion should be drawn.","Consequently|Meanwhile|Likewise|Admittedly","a","Consequently marks a result."],
+["20","Linking devices","The data is incomplete. ___, no firm conclusion should be drawn.","Consequently|Meanwhile|Likewise|Admittedly","a","Consequently introduces a result: because the data is incomplete, no firm conclusion should be drawn. Meanwhile would mean simultaneity and does not express this logic."],
 ],
 11:[
 ["01","Mixed conditionals","If the treaty had been enforced, the region ___ more stable today.","would be|would have been|is|had been","a","The past condition has a present result."],
