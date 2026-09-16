@@ -83,7 +83,7 @@ const siestaStatements = [
 const siestaAnswers = ["f", "f", "f", "t", "f", "f", "t", "t", "f", "f"];
 siestaStatements.forEach((text, index) => grade11ListeningItems.push(item(11, "listening", String(index + 11), text, ["T", "F"], siestaAnswers[index], "true / false", { groupId: "g11-2022-listening-siesta", type: "true-false" })));
 
-export const grade11Listening2022Verified = set("g11-2022-listening-verified", "Listening", "listening", grade11ListeningItems, {
+export const grade11Listening2022Verified = set("g11-2022-listening", "Listening", "listening", grade11ListeningItems, {
   audioMode: "file",
   audioSrc: "/audio/grade-11/2022/listening.mp3",
   script: "source_materials/grade-11/2022/script_52_1668763504.pdf",
@@ -136,12 +136,12 @@ function seniorUseOfEnglish(grade: Grade): QuestionSet {
   photoOptions.forEach((options, index) => items.push(item(grade, "use-of-english", String(index + 11), `Choose the best word for gap ${index + 11} in “The joy of photography”.`, options, seniorPhotoAnswers[index], "lexico-grammatical cloze", { groupId: `g${grade}-2022-uoe-photography` })));
   cultureStatements.forEach((text, index) => items.push(item(grade, "use-of-english", String(index + 21), text, ["T", "F"], cultureAnswers[index], "cultural knowledge", { groupId: `g${grade}-2022-uoe-culture`, type: "true-false" })));
   idiomPrompts.forEach((text, index) => items.push(item(grade, "use-of-english", String(index + 31), text, [], idiomAnswers[index], "food idioms", { groupId: `g${grade}-2022-uoe-idioms` })));
-  return set(`g${grade}-2022-use-of-english-verified`, "Use of English", "use-of-english", items);
+  return set(`g${grade}-2022-use-of-english`, "Use of English", "use-of-english", items);
 }
 
 export const grade10UseOfEnglish2022Verified = seniorUseOfEnglish(10);
 export const grade11UseOfEnglish2022Verified = seniorUseOfEnglish(11);
 
 const bookReviewText = "Write a 220–250 word review of a book, movie or TV series you loved. Include general information, plot, main characters, at least two things you liked and at least two reasons to recommend it to teenagers.";
-export const grade10Writing2022Verified = set("g10-2022-writing-verified", "Writing", "writing", [item(10, "writing", "01", bookReviewText, [], "", "Writing", { type: "writing", points: 20, needsReview: true, wordLimit: { min: 220, max: 250 }, requirements: ["Give a headline", "Use and underline two phrasal verbs", "Give general information", "Describe the plot and main characters", "Give at least two things you liked", "Give at least two reasons to recommend it to teenagers"] })]);
-export const grade11Writing2022Verified = set("g11-2022-writing-verified", "Writing", "writing", [item(11, "writing", "01", bookReviewText, [], "", "Writing", { type: "writing", points: 20, needsReview: true, wordLimit: { min: 220, max: 250 }, requirements: ["Give a headline", "Use and underline one idiom and two phrasal verbs", "Give general information", "Describe the plot and main characters", "Give at least two things you liked", "Give at least two reasons to recommend it to teenagers"] })]);
+export const grade10Writing2022Verified = set("g10-2022-writing", "Writing", "writing", [item(10, "writing", "01", bookReviewText, [], "", "Writing", { type: "writing", points: 20, needsReview: true, wordLimit: { min: 220, max: 250 }, requirements: ["Give a headline", "Use and underline two phrasal verbs", "Give general information", "Describe the plot and main characters", "Give at least two things you liked", "Give at least two reasons to recommend it to teenagers"] })]);
+export const grade11Writing2022Verified = set("g11-2022-writing", "Writing", "writing", [item(11, "writing", "01", bookReviewText, [], "", "Writing", { type: "writing", points: 20, needsReview: true, wordLimit: { min: 220, max: 250 }, requirements: ["Give a headline", "Use and underline one idiom and two phrasal verbs", "Give general information", "Describe the plot and main characters", "Give at least two things you liked", "Give at least two reasons to recommend it to teenagers"] })]);
