@@ -3,6 +3,20 @@ import{seniorOriginalObjective,seniorOriginalReading,seniorOriginalSet,seniorOri
 const sourceLabel="Всероссийская олимпиада школьников по английскому языку, муниципальный этап";
 const item=(grade:10|11,year:2022|2023|2024,section:Section,id:string,text:string,options:string[],answer:string,subskill:string,extra:Partial<QuestionBankItem>={}):QuestionBankItem=>({id:`g${grade}-${year}-${section}-${id}`,grade,year,stage:"municipal",source:"official-vsosh-vzlet",sourceLabel,platformLabel:"Взлёт",section,skill:section==="use-of-english"?"Use of English":section[0].toUpperCase()+section.slice(1),subskill,difficulty:"advanced",type:options.length?"multiple-choice":"gap-fill",instruction:"Complete the task.",text,options,acceptedAnswers:answer?[answer.toLowerCase()]:[],points:1,explanation:answer?"Ответ подтверждён официальным ключом.":"Автоматическая проверка недоступна: официальный ключ не найден.",tags:["official",String(year)],needsReview:!answer,...extra});
 const set=(id:string,title:string,section:Section,items:QuestionBankItem[],extra:Partial<QuestionSet>={}):QuestionSet=>({id,title,section,instruction:`Выполни задания раздела ${title}.`,items,...extra});
+
+const penwoodListeningDetails:Record<string,Partial<QuestionBankItem>>={
+"The yearly competition is held":{explanation:"Правильный ответ — along with the summer exhibition: в задании нужно выбрать, с каким музейным событием проводится ежегодный конкурс.",rule:"Для Listening multiple choice сравнивайте не отдельные похожие слова, а связь события с контекстом записи."},
+"The subject of this year's competition is using technology":{explanation:"Правильный ответ — to form better links between local people and the museum: тема конкурса связана с использованием технологий для укрепления связи музея с местными жителями.",rule:"Здесь варианты различаются целью технологии: involve young people, form links, improve engagement. Нужна именно цель, названная в записи."},
+"The competition was limited to those aged":{explanation:"Правильный ответ — 15-19: это возрастной диапазон участников конкурса.",rule:"В заданиях на числа проверяйте точный диапазон, а не только отдельную услышанную цифру."},
+"During the preparation for the entry the competitors were":{explanation:"Правильный ответ — able to use the museum's educational facilities: участникам были доступны образовательные ресурсы музея при подготовке работы.",rule:"Отличайте allowed to use facilities от helped by staff: это разные степени поддержки."},
+"According to the speaker, the prize-winning exhibits have":{explanation:"Правильный ответ — increased interest in the museum: победившие экспонаты привлекли дополнительное внимание к музею.",rule:"В этом вопросе нужен результат, а не организационная деталь конкурса."},
+"early wooden-framed TV":{explanation:"Правильный ответ — still looked fashionable: ранний wooden-framed TV сопоставляется с тем, что он всё ещё выглядел стильно.",rule:"В matching слушайте оценочное описание предмета, а не его категорию."},
+"early radios":{explanation:"Правильный ответ — too large: ранние радиоприёмники описываются как слишком большие.",rule:"В matching ищите прилагательное-оценку, которое относится именно к этому предмету."},
+"microwave ovens":{explanation:"Правильный ответ — more convenient: microwave ovens связываются с удобством по сравнению с прежними способами приготовления.",rule:"Matching часто использует paraphrase: convenient может быть выражено через ease/speed/practical use."},
+"laptops":{explanation:"Правильный ответ — exciting: laptops представлены как вызывавшие особый интерес/волнение.",rule:"Сопоставляйте предмет с эмоциональной реакцией говорящего."},
+"old cameras":{explanation:"Правильный ответ — well-constructed: old cameras оцениваются как хорошо сделанные.",rule:"Не выбирайте просто общее впечатление; нужно качество конструкции предмета."}
+};
+const withSeniorListeningDetails=(question:QuestionBankItem):QuestionBankItem=>({...question,...(penwoodListeningDetails[question.text]||{})});
 const emptySeniorSet=(id:string,section:Section):QuestionSet=>({id,title:section,section,instruction:"Complete the training tasks.",items:[]});
 export const grade10Official2024={listening:emptySeniorSet("g10-2024-listening-unavailable","listening"),reading:emptySeniorSet("g10-2024-reading-unavailable","reading"),"use-of-english":emptySeniorSet("g10-2024-uoe-unavailable","use-of-english")};
 
@@ -34,7 +48,7 @@ const g10Listening2022Items=[
  item(10,2022,"listening","18","microwave ovens",["A too large","B boring","C more convenient","D exciting","E well-constructed","F still looked fashionable"],"C","matching",{groupId:"g10-2022-listening-penwood",type:"matching"}),
  item(10,2022,"listening","19","laptops",["A too large","B boring","C more convenient","D exciting","E well-constructed","F still looked fashionable"],"D","matching",{groupId:"g10-2022-listening-penwood",type:"matching"}),
  item(10,2022,"listening","20","old cameras",["A too large","B boring","C more convenient","D exciting","E well-constructed","F still looked fashionable"],"E","matching",{groupId:"g10-2022-listening-penwood",type:"matching"}),
-];
+].map(withSeniorListeningDetails);
 export const grade10Listening2022=set("g10-2022-listening","Listening","listening",g10Listening2022Items,{audioMode:"file",audioSrc:"/audio/grade-10/2022/listening.mp3",script:"source_materials/grade-10/2022/script_52_1668763452.pdf"});
 
 const g11Listening2022Items=[
@@ -58,20 +72,64 @@ const g11Listening2022Items=[
  item(11,2022,"listening","18","Both Daniel and Amelia think shorter breaks can make the working day more efficient.",["T","F"],"T","true / false",{groupId:"g11-2022-listening-siesta",type:"true-false"}),
  item(11,2022,"listening","19","Amelia's company introduced a compulsory afternoon rest for all employees.",["T","F"],"F","true / false",{groupId:"g11-2022-listening-siesta",type:"true-false"}),
  item(11,2022,"listening","20","Daniel believes the siesta should become a legal requirement in Spanish companies.",["T","F"],"F","true / false",{groupId:"g11-2022-listening-siesta",type:"true-false"}),
-];
+].map(withSeniorListeningDetails);
 export const grade11Listening2022=set("g11-2022-listening","Listening","listening",g11Listening2022Items,{audioMode:"file",audioSrc:"/audio/grade-11/2022/listening.mp3",script:"source_materials/grade-11/2022/script_52_1668763504.pdf"});
 const helena=`Helena graduated in Fine Art in 2013. At college fellow students and tutors provided motivation, but after graduation she struggled to motivate herself. New artists must find a market, often work freelance and expose their work to criticism. Helena began to dabble in illustration to become more emotionally detached. She built a portfolio, submitted work to competitions and printed mock-up book pages. Her broad creative skills helped her resist being pigeon-holed. She recommends separating different kinds of work into distinct portfolios and even working under two names.`;
 const rTexts=["New graduates can find it hard to…","What worries new artists?","Helena became an illustrator because it…","Publishers remained…","To convince employers an artist needs…","Helena entered competitions because…","Categorizing a portfolio helps avoid…","Using two names helps artists…","Word meaning comfortable and protected","Verb meaning try an activity not seriously","Verb meaning organize a product's sale","Working for several organizations independently","Give a proposal for consideration","Artists ___ their innermost selves","Expression of approval","Paper and inspiration are the two main post-college challenges.","Earning enough money is not the greatest problem.","Helena began as a professional illustrator.","Emotional detachment helped with specified subjects.","It was vital not to be limited to one technique."];
 const rOpts=[['A get the right job','B take breaks','C motivate themselves'],['A moving','B competition','C criticism'],['A offered objectivity','B offered freedom','C guaranteed publication'],['A receptive','B cautious','C uninterested'],['A published work','B original portfolio','C cards and books'],['A she knew horoscopes','B showcase work','C print mock-ups'],['A two names','B disorienting employers','C changing style'],['A divide categories','B distinguish approaches','C remove barriers']];
 const rAnswers=['c','c','a','b','a','b','b','b','snug','dabble','market','freelance','submit','bare','praise','f','t','f','t','t'];
-const reading11=rTexts.map((text,i)=>item(11,2024,"reading",String(i+1).padStart(2,"0"),text,i<8?rOpts[i]:i>=15?["T","F"]:[],rAnswers[i],i<8?"detail comprehension":i<15?"vocabulary in context":"true or false",{groupId:"g11-2024-reading-helena",passage:i===0?helena:undefined,type:i>=15?"true-false":i<8?"multiple-choice":"gap-fill"}));
+const reading11Details=[
+{explanation:"Правильный ответ — motivate themselves: после окончания колледжа Helena struggled to motivate herself, то есть ей стало трудно поддерживать собственную мотивацию.",evidence:"after graduation she struggled to motivate herself"},
+{explanation:"Правильный ответ — criticism: начинающим художникам приходится выставлять свои работы на оценку и критику.",evidence:"expose their work to criticism"},
+{explanation:"Правильный ответ — objectivity: illustration helped Helena become more emotionally detached, то есть относиться к работе более объективно.",evidence:"become more emotionally detached"},
+{explanation:"Правильный ответ — cautious: в этом вопросе требуется отношение publishers, а не качество самой работы; выбирается осторожная реакция, а не полная открытость или безразличие."},
+{explanation:"Правильный ответ — published work: для убедительного портфолио важны реальные/публикуемые образцы, а не просто отдельные открытки или книги."},
+{explanation:"Правильный ответ — showcase work: Helena entered competitions to show her work and build a portfolio.",evidence:"She built a portfolio, submitted work to competitions"},
+{explanation:"Правильный ответ — disorienting employers: categorizing a portfolio helps employers understand what kind of work they are looking at.",evidence:"separating different kinds of work into distinct portfolios"},
+{explanation:"Правильный ответ — distinguish approaches: two names help keep different creative directions separate.",evidence:"even working under two names"},
+{explanation:"Snug means comfortable and protected; это значение слова в контексте описания безопасного/уютного состояния."},
+{explanation:"Dabble means try an activity not seriously: Helena began to dabble in illustration, то есть пробовать его без полного профессионального погружения.",evidence:"Helena began to dabble in illustration"},
+{explanation:"Market as a verb means organize a product's sale or find buyers for it; new artists must find a market.",evidence:"New artists must find a market"},
+{explanation:"Freelance means working independently for different clients/organizations rather than for one employer.",evidence:"often work freelance"},
+{explanation:"Submit means give/send a proposal or work for consideration; Helena submitted work to competitions.",evidence:"submitted work to competitions"},
+{explanation:"Bare means expose: artists bare their innermost selves when they show personal creative work to public judgement."},
+{explanation:"Praise is an expression of approval; это слово обозначает положительную оценку работы."},
+{explanation:"Правильный ответ — False: post-college challenges are motivation, market and criticism, not paper and inspiration.",evidence:"after graduation she struggled to motivate herself. New artists must find a market ... expose their work to criticism"},
+{explanation:"Правильный ответ — True: money/market matters, but the passage stresses criticism and motivation as major problems rather than naming money as the greatest problem.",evidence:"struggled to motivate herself ... expose their work to criticism"},
+{explanation:"Правильный ответ — False: Helena graduated in Fine Art and only later began to dabble in illustration.",evidence:"Helena graduated in Fine Art in 2013 ... Helena began to dabble in illustration"},
+{explanation:"Правильный ответ — True: emotional detachment helped her work with specified subjects in illustration.",evidence:"to become more emotionally detached"},
+{explanation:"Правильный ответ — True: broad creative skills helped Helena avoid being limited to one technique or category.",evidence:"Her broad creative skills helped her resist being pigeon-holed"}
+];
+const reading11=rTexts.map((text,i)=>item(11,2024,"reading",String(i+1).padStart(2,"0"),text,i<8?rOpts[i]:i>=15?["T","F"]:[],rAnswers[i],i<8?"detail comprehension":i<15?"vocabulary in context":"true or false",{groupId:"g11-2024-reading-helena",passage:i===0?helena:undefined,type:i>=15?"true-false":i<8?"multiple-choice":"gap-fill",...reading11Details[i]}));
 export const grade11Reading2024=set("g11-2024-reading","Reading","reading",reading11);
 
 const uTexts=["Complete gap 1: results or effects.","Complete gap 2: carefully select and organize.","Complete gap 3: tearing apart quickly.","Complete gap 4: one-to-one teaching.","Complete gap 5: improve through refinement.","Complete gap 6: good aspects.","Complete gap 7: use effectively.","Complete gap 8: create a copy.","Just what the doctor ___.","In the ___ of nowhere.","___ a nice change.","Watch the world go ___.","Let your ___ down.","Travel ___.","Have a ___ of a time.","E.T. The Extra-Terrestrial","Back To The Future","Inception","The Matrix","Jurassic Park"];
 const uAnswers=['outcomes','curate','ripping','tutoring','hone','positives','harnessing','replicate','c','d','a','c','d','a','b','b','d','f','c','e'];
 const idiomOpts=[['A wrote','B prescribed','C ordered','D registered'],['A centre','B midland','C medium','D middle'],['A make','B take','C discover','D cause'],['A on','B over','C by','D past'],['A hands','B feet','C head','D hair'],['A light','B effortlessly','C lose','D easy'],['A heap','B whale','C lot','D load']];
 const movieOpts=['A alien invasion','B alien left behind befriends a boy','C hacker discovers simulated reality','D teenager travels to the 1950s','E dinosaur preserve fails','F thief enters dreams'];
-const uoe11=uTexts.map((text,i)=>item(11,2024,"use-of-english",String(i+1).padStart(2,"0"),text,i<8?[]:i<15?idiomOpts[i-8]:movieOpts,uAnswers[i],i<8?"word formation":i<15?"idioms":"cultural knowledge",{groupId:i<8?"g11-2024-uoe-ai":i<15?"g11-2024-uoe-resort":"g11-2024-uoe-films"}));
+const uoe11Details=[
+{explanation:"Outcomes means results/effects; это существительное во множественном числе подходит к определению results or effects.",rule:"Vocabulary: outcome = result/effect."},
+{explanation:"Curate means carefully select and organize items or information.",rule:"Vocabulary: curate = select and arrange with judgement."},
+{explanation:"Ripping means tearing apart quickly; нужна -ing form, потому что определение описывает действие tearing.",rule:"Word form: rip → ripping; удваивается p перед -ing."},
+{explanation:"Tutoring means one-to-one teaching; требуется noun/gerund for the activity.",rule:"Word formation: tutor → tutoring."},
+{explanation:"Hone means improve through refinement, especially a skill.",rule:"Vocabulary: hone a skill/ability."},
+{explanation:"Positives means good aspects; требуется plural noun.",rule:"Adjective positive can become plural noun positives = advantages."},
+{explanation:"Harnessing means using something effectively; форма -ing подходит как noun/gerund.",rule:"Verb pattern: harness → harnessing."},
+{explanation:"Replicate means create a copy or reproduce something.",rule:"Vocabulary: replicate = copy/reproduce."},
+{explanation:"Just what the doctor ordered — идиома «именно то, что нужно». Правильный вариант ordered.",rule:"Fixed idiom: just what the doctor ordered."},
+{explanation:"In the middle of nowhere — идиома «в глуши, далеко от всего». Правильный вариант middle.",rule:"Fixed phrase: in the middle of nowhere."},
+{explanation:"Make a nice change — устойчивое выражение «быть приятным разнообразием». Правильный вариант make.",rule:"Collocation: make a change."},
+{explanation:"Watch the world go by — идиома «наблюдать за течением жизни вокруг». Правильный вариант by.",rule:"Fixed idiom: watch the world go by."},
+{explanation:"Let your hair down — идиома «расслабиться, отдохнуть». Правильный вариант hair.",rule:"Body-part idiom: let your hair down."},
+{explanation:"Travel light — устойчивое выражение «путешествовать налегке». Правильный вариант light.",rule:"Fixed phrase: travel light."},
+{explanation:"Have a whale of a time — идиома «отлично провести время». Правильный вариант whale.",rule:"Fixed idiom: have a whale of a time."},
+{explanation:"E.T. The Extra-Terrestrial — фильм об инопланетянине, который остаётся на Земле и дружит с мальчиком.",rule:"Cultural reference: E.T. = alien left behind befriends a boy."},
+{explanation:"Back To The Future — фильм, где подросток путешествует в 1950-е.",rule:"Cultural reference: Back To The Future = teenager travels to the 1950s."},
+{explanation:"Inception — фильм о воре, который проникает в сны.",rule:"Cultural reference: Inception = thief enters dreams."},
+{explanation:"The Matrix — фильм о герое, который узнаёт, что реальность является симуляцией.",rule:"Cultural reference: The Matrix = simulated reality."},
+{explanation:"Jurassic Park — фильм о парке динозавров, где система безопасности выходит из-под контроля.",rule:"Cultural reference: Jurassic Park = dinosaur preserve fails."}
+];
+const uoe11=uTexts.map((text,i)=>item(11,2024,"use-of-english",String(i+1).padStart(2,"0"),text,i<8?[]:i<15?idiomOpts[i-8]:movieOpts,uAnswers[i],i<8?"word formation":i<15?"idioms":"cultural knowledge",{groupId:i<8?"g11-2024-uoe-ai":i<15?"g11-2024-uoe-resort":"g11-2024-uoe-films",...uoe11Details[i]}));
 export const grade11UseOfEnglish2024=set("g11-2024-use-of-english","Use of English","use-of-english",uoe11);
 
 const writing=(grade:10|11,year:2022|2023|2024,text:string,min:number,max:number,requirements:string[])=>set(`g${grade}-${year}-writing`,`Writing`,`writing`,[item(grade,year,"writing","01",text,[],"","Writing",{type:"writing",points:20,needsReview:true,wordLimit:{min,max},requirements})]);
