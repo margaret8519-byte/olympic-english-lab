@@ -7,7 +7,8 @@ import{AppHeader}from"@/components/Brand";
 import{useProfile}from"@/components/ProfileBadge";
 import{grade9OriginalQuestionBank}from"@/data/questions/grade-9/original";
 import{grade9Reading2023Verified,grade9UseOfEnglish2023Verified}from"@/data/questions/grade-9/official/2023/verified";
-import{grade10Official2024,grade11Registry,seniorOriginalSet}from"@/data/questions/grade-10-11";
+import{official2024ForGrade}from"@/data/questions/grade-9-10/official-2024";
+import{grade11Registry,seniorOriginalSet}from"@/data/questions/grade-10-11";
 import{grade10UseOfEnglish2022Verified,grade11UseOfEnglish2022Verified}from"@/data/questions/grade-10-11/official-2022";
 import{grade10Reading2022Verified,grade11Reading2022Verified}from"@/data/questions/grade-10-11/official-2022-reading";
 import{grade10Reading2023Verified,grade10UseOfEnglish2023Verified}from"@/data/questions/grade-10-11/official-2023-grade10";
@@ -23,6 +24,7 @@ const sectionIcon=(section:Section)=>section==="listening"?<Headphones/>:section
 const read=<T,>(key:string,fallback:T):T=>{try{return JSON.parse(localStorage.getItem(key)||"")as T}catch{return fallback}};
 function originalSet(section:Section):QuestionSet|null{const items=grade9OriginalQuestionBank.filter(q=>q.section===section&&q.acceptedAnswers.length&&!q.needsReview).map(q=>({...q,grade:9,options:q.options.map(o=>`${o.id.toUpperCase()} ${o.label}`)})as unknown as QuestionBankItem);return items.length?{id:`olab-original-${section}`,title:sectionName[section],section,instruction:`Выполни задания раздела ${sectionName[section]}.`,items}:null}
 const canAutoScore=(set:QuestionSet)=>set.items.length>0&&set.items.every(item=>item.acceptedAnswers.length>0&&!item.needsReview);
+const grade10Official2024=official2024ForGrade(10);
 
 export default function GradeOfficialSection({junior,grade9}:{junior:QuestionSet;grade9:QuestionSet[];order?:VariantKind[]}){
  const profile=useProfile(),grade=Number(profile.grade),section=grade9[0]?.section||junior.section,[active,setActive]=useState<{session:StandaloneSession;set:QuestionSet}|null>(null),[ready,setReady]=useState(false);
