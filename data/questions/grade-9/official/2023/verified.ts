@@ -1,4 +1,4 @@
-import type { QuestionSet } from "../../types.ts";
+import type { QuestionSet } from "../../../types.ts";
 import { grade9Listening2023, grade9Reading2023, grade9UseOfEnglish2023 } from "./index.ts";
 
 /**
