@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Flag } from "lucide-react";
 import { useState } from "react";
@@ -11,6 +12,12 @@ import { official2024ForGrade } from "@/data/questions/grade-9-10/official-2024"
 import { grade10WritingSets, grade11WritingSets } from "@/data/questions/grade-10-11";
 import { originalWritingSets } from "@/data/questions/writing-original";
 import {
+  grade78Writing2019,
+  grade9Writing2019,
+  grade10Writing2019,
+  grade11Writing2019,
+} from "@/data/questions/writing-official-2019";
+import {
   grade78Writing2025,
   grade9Writing2025,
   grade10Writing2025,
@@ -22,6 +29,11 @@ import WritingSection from "./WritingSection";
 const grade9Writing2024 = official2024ForGrade(9).writing;
 const grade10Writing2024 = official2024ForGrade(10).writing;
 
+function academicYear(year: number | null | undefined) {
+  if (year == null) return "тренировка";
+  return `${year}/${year + 1}`;
+}
+
 export default function GradeWritingSection() {
   const profile = useProfile();
   const grade = Number(profile.grade);
@@ -29,13 +41,13 @@ export default function GradeWritingSection() {
   const originals = [9, 10, 11].includes(grade) ? originalWritingSets(grade as 9 | 10 | 11) : [];
   const sets =
     grade === 7 || grade === 8
-      ? [writingSet, grade78Writing2025]
+      ? [grade78Writing2019, writingSet, grade78Writing2025]
       : grade === 9
-        ? [grade9Writing2022, grade9Writing2023, grade9Writing2024, grade9Writing2025, ...originals]
+        ? [grade9Writing2019, grade9Writing2022, grade9Writing2023, grade9Writing2024, grade9Writing2025, ...originals]
         : grade === 10
-          ? [...grade10WritingSets.filter(set => set.items[0]?.year !== 2024), grade10Writing2024, grade10Writing2025, ...originals]
+          ? [grade10Writing2019, ...grade10WritingSets.filter(set => set.items[0]?.year !== 2024), grade10Writing2024, grade10Writing2025, ...originals]
           : grade === 11
-            ? [...grade11WritingSets, grade11Writing2025, ...originals]
+            ? [grade11Writing2019, ...grade11WritingSets, grade11Writing2025, ...originals]
             : [];
 
   if (selected) return <WritingSection set={selected} />;
@@ -48,20 +60,24 @@ export default function GradeWritingSection() {
           <header>
             <span>OLYMPIC ENGLISH LAB</span>
             <h1>Выбери Writing</h1>
-            <p>Работу проверит учитель после отправки</p>
+            <p>Официальные варианты «Взлёта» отмечены отдельно. Работу проверит учитель после отправки.</p>
           </header>
           <div className="training-variant-grid">
-            {sets.map((set, index) => (
-              <article key={set.id}>
-                <div className="training-variant-icon"><Flag /></div>
-                <small>ВАРИАНТ {index + 1}</small>
-                <h2>{set.title.includes("2025/2026") ? "Writing · 2025/2026" : `Writing ${index + 1}`}</h2>
-                <p>{grade} класс</p>
-                <strong>1 задание</strong>
-                <span>Ручная проверка</span>
-                <button type="button" onClick={() => setSelected(set)}>Начать</button>
-              </article>
-            ))}
+            {sets.map((set, index) => {
+              const item = set.items[0];
+              const official = item?.source === "official-vsosh-vzlet";
+              return (
+                <article key={set.id}>
+                  <div className="training-variant-icon"><Flag /></div>
+                  <small>{official ? "ОФИЦИАЛЬНЫЙ ВАРИАНТ" : "АВТОРСКАЯ ТРЕНИРОВКА"}</small>
+                  <h2>{official ? `Writing · ${academicYear(item.year)}` : `Writing · тренировка ${index + 1}`}</h2>
+                  <p>{grade} класс</p>
+                  <strong>1 задание</strong>
+                  <span>{official ? "Взлёт · ручная проверка" : "OLYMPIC ENGLISH LAB · ручная проверка"}</span>
+                  <button type="button" onClick={() => setSelected(set)}>Начать</button>
+                </article>
+              );
+            })}
           </div>
         </div>
       </main>
