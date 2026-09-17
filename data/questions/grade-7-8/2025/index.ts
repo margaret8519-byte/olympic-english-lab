@@ -42,7 +42,7 @@ const actorRows: Array<[string, string[], string]> = [
   ["How did Anna learn to speak multiple languages?", ["A She studied them at Drama School.", "B She took special language courses.", "C She learned them within her family environment."], "C"],
   ["What is the advantage of speaking multiple languages?", ["A It helps Anna understand different acting techniques.", "B It allows her to read scripts in their original language.", "C It increases the number of places where she can work."], "C"],
   ["What is the main advantage of working as an actor?", ["A It is enjoyable and creative.", "B It is rewarding.", "C It is easy to find a job."], "A"],
-  ["What kind of acting career interests Anna most?", ["A Being a theatre actress.", "B Film and television acting.", "C Directing plays."], "A"],
+  ["What kind of acting career interests Anna most?", ["A Being an actress.", "B Film and television acting.", "C Directing plays."], "A"],
   ["What does Anna think about directing compared to acting?", ["A She prefers directing to acting.", "B She enjoys both directing and acting.", "C She has tried directing and she likes acting more."], "C"],
   ["What is Anna’s parents’ reaction to her interest in stunt performing?", ["A They are happy for her.", "B They are worried.", "C They are indifferent."], "B"],
 ];
