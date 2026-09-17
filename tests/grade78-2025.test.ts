@@ -18,6 +18,7 @@ test("Vzlet 2025 Grade 7-8 Listening key is exact", () => {
   assert.deepEqual(answers(grade78Listening2025.items), [
     "F", "T", "F", "T", "T", "F", "T", "B", "B", "C", "C", "A", "A", "C", "B",
   ]);
+  assert.equal(grade78Listening2025.items[12].options[0], "A Being an actress.");
   assert.equal(
     grade78Listening2025.audioSrc,
     "https://reg.storage.yandexcloud.net/public/olymp_tasks/audio_4476_1764686336.mp3",
