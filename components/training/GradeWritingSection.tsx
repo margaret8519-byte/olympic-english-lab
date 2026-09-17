@@ -18,6 +18,12 @@ import {
   grade11Writing2019,
 } from "@/data/questions/writing-official-2019";
 import {
+  grade78Writing2020,
+  grade9Writing2020,
+  grade10Writing2020,
+  grade11Writing2020,
+} from "@/data/questions/writing-official-2020";
+import {
   grade78Writing2025,
   grade9Writing2025,
   grade10Writing2025,
@@ -41,13 +47,13 @@ export default function GradeWritingSection() {
   const originals = [9, 10, 11].includes(grade) ? originalWritingSets(grade as 9 | 10 | 11) : [];
   const sets =
     grade === 7 || grade === 8
-      ? [grade78Writing2019, writingSet, grade78Writing2025]
+      ? [grade78Writing2019, grade78Writing2020, writingSet, grade78Writing2025]
       : grade === 9
-        ? [grade9Writing2019, grade9Writing2022, grade9Writing2023, grade9Writing2024, grade9Writing2025, ...originals]
+        ? [grade9Writing2019, grade9Writing2020, grade9Writing2022, grade9Writing2023, grade9Writing2024, grade9Writing2025, ...originals]
         : grade === 10
-          ? [grade10Writing2019, ...grade10WritingSets.filter(set => set.items[0]?.year !== 2024), grade10Writing2024, grade10Writing2025, ...originals]
+          ? [grade10Writing2019, grade10Writing2020, ...grade10WritingSets.filter(set => set.items[0]?.year !== 2024), grade10Writing2024, grade10Writing2025, ...originals]
           : grade === 11
-            ? [grade11Writing2019, ...grade11WritingSets, grade11Writing2025, ...originals]
+            ? [grade11Writing2019, grade11Writing2020, ...grade11WritingSets, grade11Writing2025, ...originals]
             : [];
 
   if (selected) return <WritingSection set={selected} />;
