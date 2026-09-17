@@ -40,6 +40,7 @@ test("2025 Grade 11 uses reported speech rather than modal-verb requirement", ()
 test("2025 Grade 7-8 Writing keeps the official word limit and alien-story constraints", () => {
   const task = grade78Writing2025.items[0];
   assert.deepEqual(task.wordLimit, { min: 120, max: 200 });
+  assert.ok(task.requirements?.some(value => /title is included.*120.*200/i.test(value)));
   assert.ok(task.requirements?.some(value => /aliens/i.test(value)));
   assert.ok(task.requirements?.some(value => /spacecraft/i.test(value)));
   assert.ok(task.requirements?.some(value => /happy ending/i.test(value)));

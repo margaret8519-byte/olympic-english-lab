@@ -51,7 +51,7 @@ export const grade78Writing2025 = writingSet(
   120,
   200,
   juniorOpening,
-  ["Give the story a title connected with the plot", `Begin exactly: “${juniorOpening}”`, "Include a meeting with aliens", "Describe their spacecraft", "Use and underline two different idioms", "Give the story a happy ending"],
+  ["Give the story a title connected with the plot", "The title is included in the 120–200 word count", `Begin exactly: “${juniorOpening}”`, "Include a meeting with aliens", "Describe their spacecraft", "Use and underline two different idioms", "Give the story a happy ending"],
 );
 
 const seniorOpening = "The old man in the park told me the statue would make one wish come true, but he never told me what it would cost.";

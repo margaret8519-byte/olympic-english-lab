@@ -22,7 +22,9 @@
 - Listening — 15 баллов: Museums (T/F 1–7) + A Young Actor (multiple choice 8–15).
 - Reading — 20 баллов: sports competitions + Bolshoi Theatre.
 - Use of English — 20 баллов: word formation + idioms + famous people.
-- Writing — 120–200 слов: science-fiction story, обязательное начало про Oliver, встреча с aliens, spacecraft, 2 idioms, happy ending.
+- Writing — 120–200 слов: science-fiction story, обязательное начало про Oliver, встреча с aliens, spacecraft, 2 idioms, happy ending. Заголовок входит в объём.
+
+Статус: официальный ZIP ответов разобран 18.09.2026. Ключи Listening, Reading и Use of English перенесены в `data/questions/grade-7-8/2025/` и покрыты regression-тестом. Writing остаётся manual review. Для Reading Task 1 спортивные рисунки в интерфейсе являются визуальной реконструкцией и явно помечены как adaptation; тексты, нумерация и ключ не изменены. Для Use of English Task 2 бумажный word-search адаптирован в онлайн gap-fill с теми же семью пропусками и официальным ключом.
 
 ### 9–10 классы
 - Задания: https://reg.storage.yandexcloud.net/public/olymp_tasks/task_4474_1764686276.pdf
@@ -51,11 +53,13 @@ Reading начинается с официального текста `Leo Tolst
 
 ## Статус импорта
 
-Пока **не включать 2025/2026 в автопроверку**. Файлы ответов «Взлёта» опубликованы как ZIP и должны быть разобраны до добавления `acceptedAnswers`.
+- **7–8 классы:** objective 2025/2026 импортирован по официальному ZIP-ключу; Writing — manual review.
+- **9–10 классы:** Writing импортирован; objective ждёт разбора соответствующего официального ZIP ответов.
+- **11 класс:** Writing импортирован; objective ждёт разбора соответствующего официального ZIP ответов.
 
 Правило импорта:
 1. Сначала точный текст задания.
 2. Затем официальный ключ из соответствующего ZIP.
-3. Для Listening дополнительно проверяются script + исходный MP3.
+3. Для Listening дополнительно используются официальный script и исходный MP3.
 4. Только после этого набор получает `source: official-vsosh-vzlet` и допускается к автоматической проверке.
 5. Writing остаётся manual review.
