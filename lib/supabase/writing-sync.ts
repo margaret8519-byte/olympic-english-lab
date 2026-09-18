@@ -95,6 +95,7 @@ export function buildWritingAttemptPayload(
     metadata: {
       grade: task.grade,
       year: task.year,
+      variant: task.tags?.includes("generated-olympiad") ? "generated" : "official",
       reviewStatus: "pending",
       fullOlympiad,
       objectiveScore,
