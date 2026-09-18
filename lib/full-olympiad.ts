@@ -15,6 +15,9 @@ import {grade78Writing2025,grade9Writing2025,grade10Writing2025,grade11Writing20
 import {originalWritingSets} from "../data/questions/writing-original.ts";
 import {generatedListeningSetsForGrade} from "../data/questions/generated-listening-2026.ts";
 import {generatedWritingSetsForGrade} from "../data/questions/generated-writing-2026.ts";
+import {generatedComplete78,type GeneratedCompleteSet} from "../data/questions/generated-complete-78-2026.ts";
+import {generatedComplete910ForGrade} from "../data/questions/generated-complete-910-2026.ts";
+import {generatedComplete11} from "../data/questions/generated-complete-11-2026.ts";
 import {listeningGroupsFromSets,seededRandom,selectListeningGroup,type ListeningGroup} from "./standalone-training.ts";
 import {validatedListeningGroupsForGrade} from "./listening-registry.ts";
 
@@ -46,8 +49,19 @@ const normalizeGeneratedAdaptive=(q:AdaptiveQuestion,grade:number):FullQuestion=
   needsReview:false,
 } as FullQuestion);
 
+function generatedCompleteSetsForGrade(grade:number):GeneratedCompleteSet[]{
+  if(grade===7||grade===8)return generatedComplete78;
+  if(grade===9||grade===10)return generatedComplete910ForGrade(grade);
+  if(grade===11)return generatedComplete11;
+  return[];
+}
 function generatedFullBankForGrade(grade:number){
-  const objective:FullQuestion[]=grade===7||grade===8
+  const complete=generatedCompleteSetsForGrade(grade);
+  const completeObjective=complete.flatMap(set=>[...set.reading.items,...set.useOfEnglish.items]) as FullQuestion[];
+  const completeListening=listeningGroupsFromSets(complete.map(set=>set.listening),grade);
+  const completeWriting=complete.flatMap(set=>set.writing.items) as FullQuestion[];
+  // Keep the first-generation author bank available so an already-started browser session can still be resumed.
+  const legacyObjective:FullQuestion[]=grade===7||grade===8
     ? originalQuestionBank.map(q=>normalizeGeneratedAdaptive(q,grade))
     : grade===9
       ? grade9OriginalQuestionBank.map(q=>normalizeGeneratedAdaptive(q,9))
@@ -56,12 +70,15 @@ function generatedFullBankForGrade(grade:number){
             ...q,grade,year:2026,stage:"training",source:"original-olympic-english-lab",
             sourceLabel:"OLYMPIC ENGLISH LAB · авторская олимпиадная тренировка 2026",
             platformLabel:"OLYMPIC ENGLISH LAB",
-            tags:Array.from(new Set([...(q.tags||[]),"original","generated-olympiad","2026"]))
+            tags:Array.from(new Set([...(q.tags||[]),"original","generated-olympiad","2026","legacy-generated"]))
           } as FullQuestion))
         : [];
-  const listeningGroups=listeningGroupsFromSets(generatedListeningSetsForGrade(grade),grade);
-  const writings=generatedWritingSetsForGrade(grade).flatMap(set=>set.items) as FullQuestion[];
-  return{objective:objective.filter(question=>question.section!=="listening"),listeningGroups,writing:writings[0],writings};
+  const legacyListening=listeningGroupsFromSets(generatedListeningSetsForGrade(grade),grade);
+  const legacyWriting=generatedWritingSetsForGrade(grade).flatMap(set=>set.items) as FullQuestion[];
+  const objective=[...completeObjective,...legacyObjective];
+  const listeningGroups=[...completeListening,...legacyListening];
+  const writings=[...completeWriting,...legacyWriting];
+  return{objective,listeningGroups,writing:writings[0],writings};
 }
 
 export function fullBankForGrade(grade:number,variant:FullVariant="official"){
@@ -94,22 +111,24 @@ const firstFullSectionIndex=(ids:FullSession["questionIds"])=>ids.listening.leng
 export function nextFullSectionIndex(session:FullSession,from=session.sectionIndex){for(let index=from+1;index<FULL_SECTION_ORDER.length;index++){const section=FULL_SECTION_ORDER[index];if(section==="writing")return index;if((session.questionIds[section]||[]).length)return index}return from}
 
 export function createFullSession(grade:number,history:FullHistory={},lastIds:string[]=[],random?:()=>number,now=new Date().toISOString(),variant:FullVariant="official"):FullSession{
-  const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id),{objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
-  const listeningGroup=variant==="generated"
-    ? selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng)
-    : listeningGroups.find(group=>group.year===2025&&group.source==="official-vsosh-vzlet")||selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
-  if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const){
-    if(variant==="generated"){
-      ids[section]=selectFullQuestions(objective,section,history,lastIds,10,rng).map(q=>q.id);
-    }else{
-      const official2025=objective.filter(q=>q.section===section&&q.year===2025&&q.source==="official-vsosh-vzlet");
-      ids[section]=(official2025.length?official2025:selectFullQuestions(objective,section,history,lastIds,10,rng)).map(q=>q.id);
-    }
+  const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id);
+  if(variant==="generated"){
+    const sets=generatedCompleteSetsForGrade(grade),last=new Set(lastIds);
+    const ranked=sets.map(set=>({set,repeated:[...set.listening.items,...set.reading.items,...set.useOfEnglish.items,...set.writing.items].some(item=>last.has(item.id)),tie:rng()})).sort((a,b)=>Number(a.repeated)-Number(b.repeated)||a.tie-b.tie);
+    const selected=ranked[0]?.set;
+    if(!selected)return{version:1,id,grade,variant,startedAt:now,sectionIndex:0,questionIds:{listening:[],reading:[],"use-of-english":[]},answers:{},writingText:""};
+    const ids:FullSession["questionIds"]={
+      listening:selected.listening.items.map(question=>question.id),
+      reading:selected.reading.items.map(question=>question.id),
+      "use-of-english":selected.useOfEnglish.items.map(question=>question.id)
+    };
+    return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
-  const last=new Set(lastIds),official2025Writing=writings.find(q=>q.year===2025&&q.source==="official-vsosh-vzlet"),writing=variant==="generated"
-    ? [...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0]
-    : official2025Writing||[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
+  const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
+  const listeningGroup=listeningGroups.find(group=>group.year===2025&&group.source==="official-vsosh-vzlet")||selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
+  if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
+  for(const section of ["reading","use-of-english"] as const){const official2025=objective.filter(q=>q.section===section&&q.year===2025&&q.source==="official-vsosh-vzlet");ids[section]=(official2025.length?official2025:selectFullQuestions(objective,section,history,lastIds,10,rng)).map(q=>q.id)}
+  const last=new Set(lastIds),official2025Writing=writings.find(q=>q.year===2025&&q.source==="official-vsosh-vzlet"),writing=official2025Writing||[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
