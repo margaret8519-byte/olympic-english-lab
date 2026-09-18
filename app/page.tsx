@@ -24,5 +24,12 @@ export default function Landing(){
       />
       <Link href="/guide" className="wow-landing-guide">? Как пользоваться</Link>
     </div>
+    <nav className="wow-mobile-actions" aria-label="Навигация по платформе">
+      <Link href="/start" className="wow-mobile-primary">Пройти тренировку →</Link>
+      <div className="wow-mobile-secondary">
+        <Link href="/teacher/login">Учителям</Link>
+        <Link href="/guide">? Как пользоваться</Link>
+      </div>
+    </nav>
   </main>
 }

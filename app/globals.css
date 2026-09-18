@@ -250,3 +250,73 @@
   .guide-section-head{display:block}.guide-section-head h2{font-size:26px}.guide-section-head>a{display:inline-flex;margin-top:14px}
   .guide-step-grid{grid-template-columns:1fr}.guide-step{min-height:0}
 }
+
+
+/* Mobile landing — keep desktop artwork unchanged, fit the full hero on phones. */
+.wow-mobile-actions{display:none}
+@media(max-width:700px){
+  .wow-landing{
+    min-height:0;
+    height:auto;
+    display:block;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 0,#153e85 0,transparent 45%),
+      #06183f;
+  }
+  .wow-landing-frame{
+    width:100vw;
+    min-width:0;
+    aspect-ratio:1672/941;
+  }
+  .wow-landing-art{
+    object-fit:contain;
+    object-position:top center;
+  }
+  .wow-landing-hit,
+  .wow-landing-guide{
+    display:none;
+  }
+  .wow-mobile-actions{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:18px 18px calc(22px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,#071b49,#06183f);
+  }
+  .wow-mobile-primary{
+    min-height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    color:#fff;
+    font-size:17px;
+    font-weight:900;
+    background:linear-gradient(135deg,#ff3c46,#e80d2d);
+    box-shadow:0 12px 30px rgba(235,21,49,.35);
+  }
+  .wow-mobile-secondary{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .wow-mobile-secondary a{
+    min-height:50px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 12px;
+    border:1px solid rgba(255,255,255,.28);
+    border-radius:14px;
+    color:#fff;
+    font-size:14px;
+    font-weight:800;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(10px);
+  }
+  .wow-mobile-primary:active,
+  .wow-mobile-secondary a:active{
+    transform:scale(.98);
+  }
+}
