@@ -86,3 +86,60 @@
 .teacher-inline-writing-review{scroll-margin-top:24px;margin:0 0 28px;padding:24px;border:1px solid #9ed2f3;border-radius:18px;background:linear-gradient(135deg,#f8fdff 0%,#edf8ff 100%);box-shadow:0 10px 28px #1d72aa12}.teacher-inline-writing-review .teacher-title{margin-bottom:16px}.teacher-inline-writing-review .teacher-title h2{font-size:25px;line-height:1.35}.teacher-inline-writing-review .teacher-writing-text{margin-bottom:18px;background:#fff}.teacher-inline-writing-review .teacher-writing-text p{margin:0;white-space:pre-wrap}.teacher-inline-writing-review .teacher-review-form{display:grid;grid-template-columns:160px 160px minmax(240px,1fr);gap:14px;align-items:end;max-width:none;margin-top:0}.teacher-inline-writing-review .teacher-review-form label:last-of-type{grid-column:1/-1}.teacher-inline-writing-review .teacher-review-form button{justify-self:start}.teacher-inline-writing-review .teacher-review-form>p{grid-column:1/-1;margin:0;color:#087352;font-weight:700}@media(max-width:760px){.teacher-inline-writing-review{padding:16px}.teacher-inline-writing-review .teacher-review-form{grid-template-columns:1fr}.teacher-inline-writing-review .teacher-review-form label:last-of-type,.teacher-inline-writing-review .teacher-review-form>p{grid-column:1}.teacher-attempt-summary .primary{width:100%;text-align:center}}
 
 .new-olympiad-card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:26px;padding:28px 30px;border:1px solid #b8a9ff;border-radius:22px;background:linear-gradient(135deg,#5b46e8 0%,#7b5cf4 48%,#16b9d2 100%);color:#fff;box-shadow:0 18px 46px #5b46e82b}.new-olympiad-card>div{display:grid;gap:10px}.new-olympiad-card svg{width:34px;height:34px}.new-olympiad-card span{font-size:12px;font-weight:900;letter-spacing:.13em}.new-olympiad-card h2{font-size:30px;margin:0}.new-olympiad-card p{max-width:760px;margin:0;line-height:1.55;color:#f3f1ff}.new-olympiad-card .dashboard-sequence{margin-top:4px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}.new-olympiad-card .dashboard-sequence svg{width:15px;height:15px}.new-olympiad-card>a{display:inline-flex;align-items:center;gap:8px;padding:13px 18px;border-radius:13px;background:#fff;color:#4f3bd4;font-weight:850;white-space:nowrap}.new-olympiad-card>a svg{width:17px;height:17px}.new-olympiad-note{max-width:760px;margin:4px auto 18px;padding:12px 15px;border-radius:12px;background:#eef9ff;border:1px solid #a8dcf0;color:#24566d;line-height:1.5}@media(max-width:760px){.new-olympiad-card{grid-template-columns:1fr;padding:22px}.new-olympiad-card>a{justify-content:center}.new-olympiad-card h2{font-size:25px}}
+
+
+/* Approved WOW landing artwork — keep the design visually identical. */
+.wow-landing{
+  min-height:100svh;
+  width:100%;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:#06183f;
+}
+.wow-landing-frame{
+  position:relative;
+  width:min(100vw,calc(100svh * 1672 / 941));
+  aspect-ratio:1672/941;
+  flex:none;
+}
+.wow-landing-art{
+  object-fit:contain;
+  object-position:center;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.wow-landing-hit{
+  position:absolute;
+  z-index:2;
+  display:block;
+  border-radius:18px;
+  cursor:pointer;
+}
+.wow-landing-hit-student{
+  left:7.0%;
+  top:61.1%;
+  width:18.0%;
+  height:7.7%;
+}
+.wow-landing-hit-teacher{
+  left:25.0%;
+  top:61.3%;
+  width:7.5%;
+  height:7.0%;
+}
+.wow-landing-hit:focus-visible{
+  outline:3px solid #fff;
+  outline-offset:4px;
+  box-shadow:0 0 0 6px #ef233c;
+}
+@media(max-width:700px){
+  .wow-landing{
+    align-items:start;
+    overflow:auto;
+  }
+  .wow-landing-frame{
+    width:100vw;
+    min-width:760px;
+  }
+}
