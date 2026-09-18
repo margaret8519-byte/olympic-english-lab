@@ -23,3 +23,5 @@ test("New Olympiad has its own student route and dashboard entry",()=>{const pag
 test("teacher result lookup knows legacy and complete author ids",()=>{assert.ok(findTeacherQuestion("generated-9-digital-break-01"));assert.ok(findTeacherQuestion("generated-9-set-A-listening-01"));assert.ok(findTeacherQuestion("generated-10-set-C-reading-10"));assert.ok(findTeacherQuestion("generated-11-set-E-writing-01"))});
 
 test("student class label does not concatenate a stale class name",()=>{const source=readFileSync("components/StudentClassPanel.tsx","utf8");assert.match(source,/Класс: \{klass\.grade\}/);assert.doesNotMatch(source,/— \{klass\.class_name\}/)});
+
+test("selected login grade is not overwritten by stale class storage",()=>{const profile=readFileSync("components/ProfileBadge.tsx","utf8"),panel=readFileSync("components/StudentClassPanel.tsx","utf8");assert.doesNotMatch(profile,/profile=\{\.\.\.profile,grade:String\(klass\.grade\)/);assert.doesNotMatch(panel,/grade:String\(row\.grade\?\?profile\.grade\)/);assert.match(panel,/String\(item\.grade\?\?""\)===profile\.grade/);assert.match(panel,/Этот код относится к \$\{row\.grade\} классу/)});
