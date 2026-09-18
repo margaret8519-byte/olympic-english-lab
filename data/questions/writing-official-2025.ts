@@ -65,7 +65,7 @@ function shared910(grade: 9 | 10): QuestionSet {
     180,
     250,
     seniorOpening,
-    ["Give the story a title", `Begin exactly: “${seniorOpening}”`, "Clearly describe the wish and its unexpected cost", "Use and underline at least two different modal verbs", "Use and underline at least two different phrasal verbs", "Make sure the story has a moral"],
+    ["Give the story a title", "The title is included in the 180–250 word count", `Begin exactly: “${seniorOpening}”`, "Clearly describe the wish and its unexpected cost", "Use and underline at least two different modal verbs", "Use and underline at least two different phrasal verbs", "Make sure the story has a moral"],
   );
 }
 
