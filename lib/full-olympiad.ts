@@ -125,10 +125,11 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
-  const listeningGroup=listeningGroups.find(group=>group.year===2025&&group.source==="official-vsosh-vzlet")||selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
+  const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
+  const listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const){const official2025=objective.filter(q=>q.section===section&&q.year===2025&&q.source==="official-vsosh-vzlet");ids[section]=(official2025.length?official2025:selectFullQuestions(objective,section,history,lastIds,10,rng)).map(q=>q.id)}
-  const last=new Set(lastIds),official2025Writing=writings.find(q=>q.year===2025&&q.source==="official-vsosh-vzlet"),writing=official2025Writing||[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
+  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng).map(q=>q.id);
+  const last=new Set(lastIds),writing=[...officialWritings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
