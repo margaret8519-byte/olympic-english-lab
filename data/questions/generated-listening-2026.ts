@@ -1,4 +1,4 @@
-import type {QuestionBankItem,QuestionSet} from "../types.ts";
+import type {QuestionBankItem,QuestionSet} from "./types.ts";
 
 type Grade = "7-8"|9|10|11;
 type MCQ = {text:string;options:string[];answer:string;explanation:string};
