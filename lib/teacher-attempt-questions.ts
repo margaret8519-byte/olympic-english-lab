@@ -15,6 +15,9 @@ import {grade78Writing2020,grade9Writing2020,grade10Writing2020,grade11Writing20
 import {grade78Writing2025,grade9Writing2025,grade10Writing2025,grade11Writing2025} from "../data/questions/writing-official-2025.ts";
 import {generatedListeningSetsForGrade} from "../data/questions/generated-listening-2026.ts";
 import {generatedWritingSetsForGrade} from "../data/questions/generated-writing-2026.ts";
+import {generatedComplete78} from "../data/questions/generated-complete-78-2026.ts";
+import {generatedComplete910ForGrade} from "../data/questions/generated-complete-910-2026.ts";
+import {generatedComplete11} from "../data/questions/generated-complete-11-2026.ts";
 
 type Option={id:string;label:string};
 export type TeacherQuestion={id:string;text:string;skill:string;subskill:string;type:string;options:Option[];acceptedAnswers:string[];explanation:string};
@@ -62,7 +65,8 @@ const allQuestions:BankQuestion[]=[
   ...writingOfficial.flatMap(set=>set.items) as BankQuestion[],
   ...[9,10,11].flatMap(grade=>originalWritingSets(grade as 9|10|11).flatMap(set=>set.items)) as BankQuestion[],
   ...[7,9,10,11].flatMap(grade=>generatedListeningSetsForGrade(grade).flatMap(set=>set.items)) as BankQuestion[],
-  ...[7,9,10,11].flatMap(grade=>generatedWritingSetsForGrade(grade).flatMap(set=>set.items)) as BankQuestion[]
+  ...[7,9,10,11].flatMap(grade=>generatedWritingSetsForGrade(grade).flatMap(set=>set.items)) as BankQuestion[],
+  ...[...generatedComplete78,...generatedComplete910ForGrade(9),...generatedComplete910ForGrade(10),...generatedComplete11].flatMap(set=>[...set.listening.items,...set.reading.items,...set.useOfEnglish.items,...set.writing.items]) as BankQuestion[]
 ];
 const questionById=new Map(allQuestions.map(question=>[question.id,normalizeQuestion(question)]));
 const normalized=(value:string)=>value.trim().toLowerCase();
