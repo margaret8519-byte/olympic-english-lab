@@ -90,9 +90,9 @@ export function fullBankForGrade(grade:number,variant:FullVariant="official"){
     ? [...grade9OriginalQuestionBank.map(q=>normalizeAdaptive(q,9)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade9Official2024[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade9Official2024.listening.id:q.groupId})))]
     : [...originalQuestionBank.map(q=>normalizeAdaptive(q,grade)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade782022Sets[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade782022Sets.listening.id:q.groupId})))];
   const currentObjective=shared2025?[...keyed(shared2025.reading.items),...keyed(shared2025["use-of-english"].items)] as FullQuestion[]:[];
-  const objective=[...baseObjective,...currentObjective].filter(question=>question.source==="official-vsosh-vzlet");
+  const objective=[...baseObjective,...currentObjective];
   const writingSets=grade===10?[grade10Writing2025,...grade10WritingSets,...originalWritingSets(10)]:grade===11?[grade11Writing2025,...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2025,grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade78Writing2025,grade782022Sets.writing];
-  const writings=(writingSets.flatMap(set=>set.items) as FullQuestion[]).filter(question=>question.source==="official-vsosh-vzlet");
+  const writings=writingSets.flatMap(set=>set.items) as FullQuestion[];
   const currentListening=shared2025?listeningGroupsFromSets([shared2025.listening],grade):[];
   const listeningGroups=grade>=9?[...currentListening,...validatedListeningGroupsForGrade(grade)]:[...currentListening,...listeningGroupsFromSets([grade782022Sets.listening],grade)];
   return{objective:objective.filter(question=>question.section!=="listening"),listeningGroups,writing:writings[0],writings};
@@ -125,10 +125,11 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
+  const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
   const listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(objective,section,history,lastIds,10,rng).map(q=>q.id);
-  const last=new Set(lastIds),writing=[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
+  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng).map(q=>q.id);
+  const last=new Set(lastIds),writing=[...officialWritings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
