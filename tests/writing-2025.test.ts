@@ -29,6 +29,7 @@ test("2025 Grade 9 and 10 share the same official story requirements", () => {
   assert.deepEqual(g9.wordLimit, { min: 180, max: 250 });
   assert.deepEqual(g10.wordLimit, { min: 180, max: 250 });
   assert.deepEqual(g9.requirements, g10.requirements);
+  assert.ok(g9.requirements?.some(value => /title is included.*180.*250/i.test(value)));
 });
 
 test("2025 Grade 11 uses reported speech rather than modal-verb requirement", () => {
