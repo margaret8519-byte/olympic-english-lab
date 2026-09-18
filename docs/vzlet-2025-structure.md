@@ -36,7 +36,9 @@
 - Listening — 20 баллов: five speakers / scents (1–14) + Farza Abad / house-plant business (15–20).
 - Reading — 20 баллов: city nicknames (1–13) + Leo Tolstoy and technological innovations (14–20).
 - Use of English — 20 баллов: food photography crossword (1–7) + idioms (8–13) + UK landmarks (14–20).
-- Writing — 180–250 слов: story с обязательным началом `The old man in the park told me the statue would make one wish come true, but he never told me what it would cost.`; title, wish + unexpected cost, 2 modal verbs, 2 phrasal verbs, moral.
+- Writing — 180–250 слов: story с обязательным началом `The old man in the park told me the statue would make one wish come true, but he never told me what it would cost.`; title, wish + unexpected cost, 2 modal verbs, 2 phrasal verbs, moral. Заголовок входит в объём.
+
+Статус: официальный ZIP ответов разобран 18.09.2026. Ключи Listening, Reading и Use of English перенесены в `data/questions/grade-9-10/official-2025.ts` и покрыты regression-тестом для обоих классов. Listening использует официальный MP3 «Взлёта». Бумажный crossword в Use of English Task 1 адаптирован в онлайн gap-fill по тем же определениям и официальному ключу; Task 2 сохраняет полные официальные идиомы.
 
 ### 11 класс
 - Задания: https://reg.storage.yandexcloud.net/public/olymp_tasks/task_4475_1764686292.pdf
@@ -54,7 +56,7 @@ Reading начинается с официального текста `Leo Tolst
 ## Статус импорта
 
 - **7–8 классы:** objective 2025/2026 импортирован по официальному ZIP-ключу; Writing — manual review.
-- **9–10 классы:** Writing импортирован; objective ждёт разбора соответствующего официального ZIP ответов.
+- **9–10 классы:** objective 2025/2026 импортирован по официальному ZIP-ключу для общего варианта 9–10 классов; Writing — manual review.
 - **11 класс:** Writing импортирован; objective ждёт разбора соответствующего официального ZIP ответов.
 
 Правило импорта:
