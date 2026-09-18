@@ -7,6 +7,8 @@ import {grade9Official2024} from "../data/questions/grade-9/official/2024/index.
 import {grade9Writing2022} from "../data/questions/grade-9/official/2022/index.ts";
 import {grade9Writing2023} from "../data/questions/grade-9/official/2023/index.ts";
 import {grade10WritingSets,grade11WritingSets,objectiveBankForSeniorGrade} from "../data/questions/grade-10-11/index.ts";
+import {official2025ForGrade} from "../data/questions/grade-9-10/official-2025.ts";
+import {grade9Writing2025,grade10Writing2025} from "../data/questions/writing-official-2025.ts";
 import {originalWritingSets} from "../data/questions/writing-original.ts";
 import {listeningGroupsFromSets,seededRandom,selectListeningGroup,type ListeningGroup} from "./standalone-training.ts";
 import {validatedListeningGroupsForGrade} from "./listening-registry.ts";
@@ -26,14 +28,18 @@ const normalizeAdaptive=(q:AdaptiveQuestion,grade:number):FullQuestion=>({
 const keyed=(items:readonly QuestionBankItem[])=>items.filter(q=>!q.needsReview&&q.acceptedAnswers.length);
 
 export function fullBankForGrade(grade:number){
-  const objective:FullQuestion[]=grade===10||grade===11
+  const shared2025=grade===9||grade===10?official2025ForGrade(grade):null;
+  const baseObjective:FullQuestion[]=grade===10||grade===11
     ? objectiveBankForSeniorGrade(grade).map(q=>({...q,groupId:q.section==="listening"&&!q.groupId?`g${grade}-2024-listening-audio`:q.groupId}) as FullQuestion)
     : grade===9
     ? [...grade9OriginalQuestionBank.map(q=>normalizeAdaptive(q,9)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade9Official2024[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade9Official2024.listening.id:q.groupId})))]
     : [...originalQuestionBank.map(q=>normalizeAdaptive(q,grade)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade782022Sets[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade782022Sets.listening.id:q.groupId})))];
-  const writingSets=grade===10?[...grade10WritingSets,...originalWritingSets(10)]:grade===11?[...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade782022Sets.writing];
+  const currentObjective=shared2025?[...keyed(shared2025.reading.items),...keyed(shared2025["use-of-english"].items)] as FullQuestion[]:[];
+  const objective=[...baseObjective,...currentObjective];
+  const writingSets=grade===10?[grade10Writing2025,...grade10WritingSets,...originalWritingSets(10)]:grade===11?[...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2025,grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade782022Sets.writing];
   const writings=writingSets.flatMap(set=>set.items) as FullQuestion[];
-  const listeningGroups=grade>=9?validatedListeningGroupsForGrade(grade):listeningGroupsFromSets([grade782022Sets.listening],grade);
+  const currentListening=shared2025?listeningGroupsFromSets([shared2025.listening],grade):[];
+  const listeningGroups=grade>=9?[...currentListening,...validatedListeningGroupsForGrade(grade)]:listeningGroupsFromSets([grade782022Sets.listening],grade);
   return{objective:objective.filter(question=>question.section!=="listening"),listeningGroups,writing:writings[0],writings};
 }
 
@@ -50,10 +56,10 @@ const firstFullSectionIndex=(ids:FullSession["questionIds"])=>ids.listening.leng
 export function nextFullSectionIndex(session:FullSession,from=session.sectionIndex){for(let index=from+1;index<FULL_SECTION_ORDER.length;index++){const section=FULL_SECTION_ORDER[index];if(section==="writing")return index;if((session.questionIds[section]||[]).length)return index}return from}
 
 export function createFullSession(grade:number,history:FullHistory={},lastIds:string[]=[],random?:()=>number,now=new Date().toISOString()):FullSession{
-  const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id),{objective,listeningGroups,writings}=fullBankForGrade(grade),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value)),listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
+  const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id),{objective,listeningGroups,writings}=fullBankForGrade(grade),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value)),official2025Listening=listeningGroups.find(group=>group.year===2025&&group.source==="official-vsosh-vzlet"),listeningGroup=official2025Listening||selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(objective,section,history,lastIds,10,rng).map(q=>q.id);
-  const last=new Set(lastIds),writing=[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
+  for(const section of ["reading","use-of-english"] as const){const official2025=objective.filter(q=>q.section===section&&q.year===2025&&q.source==="official-vsosh-vzlet");ids[section]=(official2025.length?official2025:selectFullQuestions(objective,section,history,lastIds,10,rng)).map(q=>q.id)}
+  const last=new Set(lastIds),official2025Writing=writings.find(q=>q.year===2025&&q.source==="official-vsosh-vzlet"),writing=official2025Writing||[...writings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
   return{version:1,id,grade,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
@@ -73,9 +79,9 @@ const commonBaseVerbs=new Set(["access","admit","apply","appear","arrive","belie
 const commonBaseNouns=new Set(["child","danger","friend","history","nature","person","science","success","tradition"]);
 const commonBaseAdjectives=new Set(["available","consistent","different","legal","possible","regular","responsible","safe","successful"]);
 const vocabularyMeanings:Record<string,string>={cast:"глагол cast образует устойчивые сочетания cast light on и cast doubt on",made:"made не сочетается с light on или doubt on в этих значениях",set:"set означает установить/поставить, но не образует выражение cast light on",put:"put означает положить/поместить и не образует нужное сочетание",did:"did не употребляется в сочетании doubt on",contradictory:"contradictory означает противоречащий, взаимоисключающий",identical:"identical означает одинаковый",obedient:"obedient означает послушный",scarce:"scarce означает редкий или дефицитный",make:"make используется в collocation make a decision",do:"do не образует collocation с decision"};
-function reviewOptionKey(option:string){return option.match(/^[A-F](?=\s|$)/i)?.[0].toLowerCase()||option.trim().toLowerCase()}
-function optionText(option:string){return option.replace(/^[A-F](?=\s|$)\s*/i,"").trim()}
-function optionDisplay(option:string){const match=option.match(/^([A-F])(?=\s|$)\s*(.*)$/i);return match?`${match[1].toUpperCase()} — ${match[2].trim()}`:option.trim()}
+function reviewOptionKey(option:string){return option.match(/^[A-Ia-i](?=[\s.)])/i)?.[0].toLowerCase()||option.trim().toLowerCase()}
+function optionText(option:string){return option.replace(/^[A-Ia-i](?=[\s.)])\s*/i,"").trim()}
+function optionDisplay(option:string){const match=option.match(/^([A-Ia-i])(?=[\s.)])\s*[.)]?\s*(.*)$/i);return match?`${match[1].toUpperCase()} — ${match[2].trim()}`:option.trim()}
 function reviewAnswer(question:FullQuestion,value:string|undefined):ReviewAnswer{if(!value?.trim())return{display:"—",text:"—",key:""};const normalized=value.trim().toLowerCase(),option=question.options.find(item=>reviewOptionKey(item)===normalized||item.trim().toLowerCase()===normalized);if(option)return{display:optionDisplay(option),text:optionText(option),key:reviewOptionKey(option)};if(["t","f","ns"].includes(normalized)){const display=normalized.toUpperCase();return{display,text:display,key:normalized}}const text=value.trim();return{display:text,text,key:normalized}}
 function reviewSentences(source:string){return source.split(/(?<=[.!?])\s+|\n+/).map(sentence=>sentence.replace(/\s+/g," ").trim()).filter(Boolean)}
 function reviewKeywords(text:string){return Array.from(new Set(text.toLowerCase().replace(/[^a-zа-яё0-9\s-]/giu," ").split(/\s+/).map(word=>word.trim()).filter(word=>word.length>3&&!reviewStopWords.has(word))))}
