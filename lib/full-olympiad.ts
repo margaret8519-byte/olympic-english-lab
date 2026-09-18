@@ -2,6 +2,7 @@
 import type {AdaptiveQuestion} from "../data/questions/grade-7-8/original/types.ts";
 import {originalQuestionBank} from "../data/questions/grade-7-8/original/index.ts";
 import {grade782022Sets} from "../data/questions/grade-7-8/2022/index.ts";
+import {grade782025Sets} from "../data/questions/grade-7-8/2025/index.ts";
 import {grade9OriginalQuestionBank} from "../data/questions/grade-9/original/index.ts";
 import {grade9Official2024} from "../data/questions/grade-9/official/2024/index.ts";
 import {grade9Writing2022} from "../data/questions/grade-9/official/2022/index.ts";
@@ -9,7 +10,7 @@ import {grade9Writing2023} from "../data/questions/grade-9/official/2023/index.t
 import {grade10WritingSets,grade11WritingSets,objectiveBankForSeniorGrade} from "../data/questions/grade-10-11/index.ts";
 import {official2025ForGrade} from "../data/questions/grade-9-10/official-2025.ts";
 import {grade11Official2025} from "../data/questions/grade-11/official-2025.ts";
-import {grade9Writing2025,grade10Writing2025,grade11Writing2025} from "../data/questions/writing-official-2025.ts";
+import {grade78Writing2025,grade9Writing2025,grade10Writing2025,grade11Writing2025} from "../data/questions/writing-official-2025.ts";
 import {originalWritingSets} from "../data/questions/writing-original.ts";
 import {listeningGroupsFromSets,seededRandom,selectListeningGroup,type ListeningGroup} from "./standalone-training.ts";
 import {validatedListeningGroupsForGrade} from "./listening-registry.ts";
@@ -29,7 +30,7 @@ const normalizeAdaptive=(q:AdaptiveQuestion,grade:number):FullQuestion=>({
 const keyed=(items:readonly QuestionBankItem[])=>items.filter(q=>!q.needsReview&&q.acceptedAnswers.length);
 
 export function fullBankForGrade(grade:number){
-  const shared2025=grade===9||grade===10?official2025ForGrade(grade):grade===11?grade11Official2025:null;
+  const shared2025=grade===7||grade===8?grade782025Sets:grade===9||grade===10?official2025ForGrade(grade):grade===11?grade11Official2025:null;
   const baseObjective:FullQuestion[]=grade===10||grade===11
     ? objectiveBankForSeniorGrade(grade).map(q=>({...q,groupId:q.section==="listening"&&!q.groupId?`g${grade}-2024-listening-audio`:q.groupId}) as FullQuestion)
     : grade===9
@@ -37,10 +38,10 @@ export function fullBankForGrade(grade:number){
     : [...originalQuestionBank.map(q=>normalizeAdaptive(q,grade)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade782022Sets[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade782022Sets.listening.id:q.groupId})))];
   const currentObjective=shared2025?[...keyed(shared2025.reading.items),...keyed(shared2025["use-of-english"].items)] as FullQuestion[]:[];
   const objective=[...baseObjective,...currentObjective];
-  const writingSets=grade===10?[grade10Writing2025,...grade10WritingSets,...originalWritingSets(10)]:grade===11?[grade11Writing2025,...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2025,grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade782022Sets.writing];
+  const writingSets=grade===10?[grade10Writing2025,...grade10WritingSets,...originalWritingSets(10)]:grade===11?[grade11Writing2025,...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2025,grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade78Writing2025,grade782022Sets.writing];
   const writings=writingSets.flatMap(set=>set.items) as FullQuestion[];
   const currentListening=shared2025?listeningGroupsFromSets([shared2025.listening],grade):[];
-  const listeningGroups=grade>=9?[...currentListening,...validatedListeningGroupsForGrade(grade)]:listeningGroupsFromSets([grade782022Sets.listening],grade);
+  const listeningGroups=grade>=9?[...currentListening,...validatedListeningGroupsForGrade(grade)]:[...currentListening,...listeningGroupsFromSets([grade782022Sets.listening],grade)];
   return{objective:objective.filter(question=>question.section!=="listening"),listeningGroups,writing:writings[0],writings};
 }
 

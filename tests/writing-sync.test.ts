@@ -13,6 +13,7 @@ import {
   buildWritingAttemptPayload,
   getWritingSubmissionErrorMessage,
   needsWritingAnswerInsert,
+  writingSubmissionKey,
   type WritingSubmissionInput,
 } from "../lib/supabase/writing-sync.ts";
 
@@ -36,7 +37,7 @@ test("Official Writing 2024 with 227 words produces a pending-review attempt", (
   assert.equal(payload.mode, "official");
   assert.equal(payload.metadata.reviewStatus, "pending");
   assert.equal(payload.metadata.wordCount, 227);
-  assert.equal(payload.metadata.requirementsMet.wordCount200To250, true);
+  assert.equal(payload.metadata.requirementsMet.wordCountInLimit, true);
   assert.equal(payload.score, null);
   assert.equal(payload.max_score, null);
   assert.equal(payload.percentage, null);
@@ -110,3 +111,6 @@ test("technical fetch errors are hidden from students", () => {
   assert.doesNotMatch(message, /Failed to fetch/i);
   assert.match(message, /сервером|интернет/i);
 });
+
+test("Writing local state is isolated by task id, not only grade and year",()=>{assert.notEqual(writingSubmissionKey("g9-2025-writing-01"),writingSubmissionKey("g9-original-writing-community-01"));assert.match(writingSubmissionKey("g9-2025-writing-01"),/g9-2025-writing-01/);const source=readFileSync("components/training/WritingSection.tsx","utf8");assert.match(source,/olympic-writing-draft-v2-\$\{task\.id\}/);assert.match(source,/writingSubmissionKey\(task\.id\)/)});
+test("full Olympiad Writing attempt metadata includes objective result context",()=>{const session=createFullSession(11,{},[]),questions=resolveSessionQuestions(session);session.answers=Object.fromEntries(questions.map(q=>[q.id,q.acceptedAnswers[0]||""]));const storage={getItem(key:string){return key===FULL_ACTIVE_KEY?JSON.stringify(session):null},setItem(){}};const objective=buildFullObjectiveAnswerPayloads(storage,session.id,"student-id"),payload=buildWritingAttemptPayload({...input,attemptId:session.id,task:session.grade===11?{...input.task,grade:11,id:session.writingTaskId||input.task.id}:input.task},"student-id",objective);assert.equal(payload.mode,"olympiad");assert.equal(payload.total_questions,objective.length+1);assert.equal(payload.metadata.fullOlympiad,true);assert.equal(payload.metadata.objectiveQuestions,objective.length);assert.ok(payload.metadata.objectiveMax>0)});
