@@ -22,6 +22,7 @@ export default function Landing(){
         className="wow-landing-hit wow-landing-hit-teacher"
         aria-label="Учителям"
       />
+      <Link href="/guide" className="wow-landing-guide">? Как пользоваться</Link>
     </div>
   </main>
 }
