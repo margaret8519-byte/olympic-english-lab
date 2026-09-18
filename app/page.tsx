@@ -1,2 +1,27 @@
-import Link from "next/link";import {ArrowRight,BookOpen,Headphones,Mic2,Puzzle} from "lucide-react";import {Signature,Vzlet} from "@/components/Brand";
-export default function Landing(){return <main className="landing"><header className="landing-header"><Vzlet/><Signature/></header><div className="red-orb one"/><div className="red-orb two"/><section className="landing-hero"><div className="hero-copy"><div className="eyebrow">ИНТЕРАКТИВНЫЙ ТРЕНАЖЁР</div><h1>OLYMPIC<br/><em>ENGLISH</em><br/>LAB</h1><p>Олимпиадные задания платформы Взлёт<br/>в формате интерактивного тренажёра</p><div className="skills-line"><Headphones/> Listening <span>•</span> Reading <span>•</span> Use of English <span>•</span> Speaking</div><Link href="/start" className="primary red">Пройти тренировку <ArrowRight/></Link><Link href="/teacher/login" className="teacher-landing-link">Учителям</Link></div><div className="app-mockup"><div className="mock-top"><b>Задание 7 <span>/ 24</span></b><small>Use of English</small><span>58%</span></div><div className="mock-grid"><div className="mock-question"><small>Прочитайте текст и выберите правильный вариант ответа.</small><p>The research suggests that regular practice and a positive mindset ___ significantly improve performance in language learning.</p>{["has","have","is having","are having"].map((x,i)=><div className={`answer ${i===1?"chosen":""}`} key={x}><i>{String.fromCharCode(65+i)}</i>{x}</div>)}</div><div className="mock-progress"><b>Прогресс</b><div className="bar"><i style={{width:"58%"}}/></div>{[[Headphones,"Listening"],[BookOpen,"Reading"],[Puzzle,"Use of English"],[Mic2,"Speaking"]].map(([I,n])=>{const Icon=I as typeof Headphones;return <div className="mock-skill" key={n as string}><Icon/><span>{n as string}</span><i/></div>})}<button>Далее <ArrowRight/></button></div></div></div></section></main>}
+import Image from "next/image";
+import Link from "next/link";
+
+export default function Landing(){
+  return <main className="wow-landing">
+    <div className="wow-landing-frame">
+      <Image
+        src="/landing-wow.webp"
+        alt="Olympic English Lab — интерактивный олимпиадный тренажёр"
+        fill
+        priority
+        sizes="100vw"
+        className="wow-landing-art"
+      />
+      <Link
+        href="/start"
+        className="wow-landing-hit wow-landing-hit-student"
+        aria-label="Пройти тренировку"
+      />
+      <Link
+        href="/teacher/login"
+        className="wow-landing-hit wow-landing-hit-teacher"
+        aria-label="Учителям"
+      />
+    </div>
+  </main>
+}
