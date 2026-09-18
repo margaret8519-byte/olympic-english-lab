@@ -9,6 +9,7 @@ import { createClient } from "./client.ts";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 type StorageLike = Pick<Storage, "getItem" | "setItem">;
+type ObjectivePayload = ReturnType<typeof buildFullObjectiveAnswerPayloads>[number];
 
 export type WritingSubmissionInput = {
   attemptId: string;
@@ -22,6 +23,7 @@ export type WritingSubmissionInput = {
 
 export type WritingSubmissionMarker = {
   attemptId: string;
+  taskId: string;
   year: number;
   wordCount: number;
   submittedAt: string;
@@ -31,8 +33,8 @@ export type WritingSubmissionMarker = {
   teacherComment?: string | null;
 };
 
-export const writingSubmissionKey = (grade: number | string, year: number) =>
-  `olympic-writing-submission-${grade}-${year}`;
+export const writingSubmissionKey = (taskId: string) =>
+  `olympic-writing-submission-v2-${taskId}`;
 
 export function getWritingSubmissionErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
@@ -55,16 +57,26 @@ export const needsWritingAnswerInsert = (
 export function buildWritingAttemptPayload(
   input: WritingSubmissionInput,
   studentId: string,
+  objectivePayloads: ObjectivePayload[] = [],
 ) {
   const { task } = input;
   const inLimit =
     !!task.wordLimit &&
     input.wordCount >= task.wordLimit.min &&
     input.wordCount <= task.wordLimit.max;
+  const fullOlympiad = objectivePayloads.length > 0;
+  const objectiveScore = objectivePayloads.reduce(
+    (sum, row) => sum + Number(row.points || 0),
+    0,
+  );
+  const objectiveMax = objectivePayloads.reduce(
+    (sum, row) => sum + Number(row.max_points || 0),
+    0,
+  );
   return {
     id: input.attemptId,
     student_id: studentId,
-    mode: "official",
+    mode: fullOlympiad ? "olympiad" : "official",
     section: "writing",
     source: task.source,
     started_at: input.startedAt,
@@ -72,29 +84,32 @@ export function buildWritingAttemptPayload(
     score: null,
     max_score: null,
     percentage: null,
-    total_questions: 1,
-    correct_answers: null,
-    incorrect_answers: null,
+    total_questions: objectivePayloads.length + 1,
+    correct_answers: fullOlympiad
+      ? objectivePayloads.filter((row) => row.is_correct === true).length
+      : null,
+    incorrect_answers: fullOlympiad
+      ? objectivePayloads.filter((row) => row.is_correct === false).length
+      : null,
     weak_subskill: null,
     metadata: {
       grade: task.grade,
       year: task.year,
       reviewStatus: "pending",
+      fullOlympiad,
+      objectiveScore,
+      objectiveMax,
+      objectiveQuestions: objectivePayloads.length,
       wordCount: input.wordCount,
       requirementsMet: {
-        wordCount200To250: inLimit,
+        wordCountInLimit: inLimit,
         headlinePresent: input.headlinePresent,
       },
       detectedRequirements: {
         wordCount: input.wordCount,
         headlinePresent: input.headlinePresent,
       },
-      needsExpertReview: [
-        "required content elements",
-        "passive structures",
-        "idioms",
-        "reasons for teenagers to visit",
-      ],
+      needsExpertReview: task.requirements || ["writing task requirements"],
     },
   };
 }
@@ -165,9 +180,16 @@ export async function saveWritingSubmission(
       throw new Error("No active Supabase session for the current student");
 
     const studentId = session.user.id;
+    const objectivePayloads = buildFullObjectiveAnswerPayloads(
+      storage,
+      input.attemptId,
+      studentId,
+    );
     const { error: attemptError } = await supabase
       .from("attempts")
-      .upsert(buildWritingAttemptPayload(input, studentId), { onConflict: "id" });
+      .upsert(buildWritingAttemptPayload(input, studentId, objectivePayloads), {
+        onConflict: "id",
+      });
     if (attemptError) throw attemptError;
 
     const { data: existing, error: readError } = await supabase
@@ -178,7 +200,7 @@ export async function saveWritingSubmission(
 
     const existingIds = new Set((existing || []).map((row) => row.question_id));
     const payloads = [
-      ...buildFullObjectiveAnswerPayloads(storage, input.attemptId, studentId),
+      ...objectivePayloads,
       buildWritingAnswerPayload(input, studentId),
     ].filter((payload) => !existingIds.has(payload.question_id));
 
@@ -191,15 +213,13 @@ export async function saveWritingSubmission(
 
     const marker: WritingSubmissionMarker = {
       attemptId: input.attemptId,
+      taskId: input.task.id,
       year: input.task.year,
       wordCount: input.wordCount,
       submittedAt: input.completedAt,
       reviewStatus: "pending",
     };
-    storage.setItem(
-      writingSubmissionKey(input.task.grade, input.task.year),
-      JSON.stringify(marker),
-    );
+    storage.setItem(writingSubmissionKey(input.task.id), JSON.stringify(marker));
     return { status: "submitted" };
   } catch (error) {
     return { status: "error", error: getWritingSubmissionErrorMessage(error) };
