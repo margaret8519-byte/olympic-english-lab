@@ -51,13 +51,19 @@
 - adult learning experiences — 7–13;
 - podcast host Brian Felthmore — 14–20.
 
-Reading начинается с официального текста `Leo Tolstoy and the technological revolution: an uneasy embrace`.
+Структура письменного тура:
+- Listening — 20 баллов: Farza Abad / house-plant business (1–6) + adult learning experiences (7–13) + podcast host Brian Felthmore (14–20).
+- Reading — 20 баллов: Leo Tolstoy and technological innovations (1–7) + Pacific Northwest Tree Octopus (8–20).
+- Use of English — 20 баллов: food photography crossword (1–7) + idioms / The Bottom Line (8–14) + Greatest Britons (15–20).
+- Writing — 180–250 слов: то же обязательное начало про statue/wish, но языковое требование 11 класса — минимум 2 случая reported speech + 2 разных phrasal verbs; заголовок входит в объём.
+
+Статус: официальный ZIP ответов разобран 18.09.2026. Ключи Listening, Reading и Use of English перенесены в `data/questions/grade-11/official-2025.ts`; подключены официальный MP3 и Full Olympiad. В Listening 9–10 и 11–12 допускается любой порядок двух официальных ответов, при этом интерфейс не позволяет выбрать один и тот же вариант дважды для одной пары. Бумажный crossword адаптирован в онлайн gap-fill.
 
 ## Статус импорта
 
 - **7–8 классы:** objective 2025/2026 импортирован по официальному ZIP-ключу; Writing — manual review.
 - **9–10 классы:** objective 2025/2026 импортирован по официальному ZIP-ключу для общего варианта 9–10 классов; Writing — manual review.
-- **11 класс:** Writing импортирован; objective ждёт разбора соответствующего официального ZIP ответов.
+- **11 класс:** objective 2025/2026 импортирован по официальному ZIP-ключу; Writing — manual review; полный вариант 2025/2026 подключён в Full Olympiad.
 
 Правило импорта:
 1. Сначала точный текст задания.
