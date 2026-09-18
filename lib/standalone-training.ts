@@ -1,5 +1,6 @@
 import type{QuestionBankItem,QuestionSet,Section}from"../data/questions/types.ts";
 import{isQuestionAllowedForGrade}from"./training-grade.ts";
+import{checkAnswer}from"./answer-checker.ts";
 
 export type StandaloneHistory=Record<string,{seen:number;incorrect:number}>;
 export type StandaloneSession={version:1;id:string;studentId:string;grade:number;section:Section;questionIds:string[];listeningGroupId?:string;startedAt:string;status:"active"|"completed"};
@@ -33,4 +34,4 @@ export function createStandaloneSession(studentId:string,grade:number,section:Se
 export function createStandaloneListeningSession(studentId:string,grade:number,groups:ListeningGroup[],history:StandaloneHistory={},lastGroupId?:string,random?:()=>number,now=new Date().toISOString()){const id=globalThis.crypto?.randomUUID?.()||`standalone-${Date.now()}`,group=selectListeningGroup(groups,history,lastGroupId,random||seededRandom(id));if(!group)return null;return{session:{version:1,id,studentId,grade,section:"listening",questionIds:group.questions.map(question=>question.id),listeningGroupId:group.id,startedAt:now,status:"active"}as StandaloneSession,group,questions:group.questions}}
 export function resolveStandaloneQuestions(session:StandaloneSession,bank:QuestionBankItem[]){const map=new Map(bank.map(question=>[question.id,question]));return session.questionIds.map(id=>map.get(id)).filter(Boolean)as QuestionBankItem[]}
 export function resolveStandaloneListeningGroup(session:StandaloneSession,groups:ListeningGroup[]){const group=groups.find(candidate=>candidate.id===session.listeningGroupId);return group&&session.questionIds.length===group.questions.length&&session.questionIds.every((id,index)=>id===group.questions[index].id)?group:null}
-export function completeStandaloneHistory(history:StandaloneHistory,questions:QuestionBankItem[],answers:Record<string,string>){const next={...history};for(const question of questions){const old=next[question.id]||{seen:0,incorrect:0},answer=(answers[question.id]||"").trim().toLowerCase(),correct=question.acceptedAnswers.includes(answer);next[question.id]={seen:old.seen+1,incorrect:old.incorrect+(correct?0:1)}}return next}
+export function completeStandaloneHistory(history:StandaloneHistory,questions:QuestionBankItem[],answers:Record<string,string>){const next={...history};for(const question of questions){const old=next[question.id]||{seen:0,incorrect:0},correct=checkAnswer(question,answers[question.id]||"")===true;next[question.id]={seen:old.seen+1,incorrect:old.incorrect+(correct?0:1)}}return next}
