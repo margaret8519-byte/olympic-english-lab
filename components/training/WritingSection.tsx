@@ -14,7 +14,7 @@ const countWords=(text:string)=>text.trim()?text.trim().split(/\s+/).length:0;
 export const hasWritingHeadline=(text:string)=>{const first=text.split(/\r?\n/).map(line=>line.trim()).find(Boolean)||"";return first.length>=3&&first.split(/\s+/).length<=12};
 
 export default function WritingSection({set=writingSet}:{set?:QuestionSet}){
- const task=set.items[0],profile=useProfile(),storageKey=`olympic-writing-${task.grade}-${task.year}`,submissionKey=writingSubmissionKey(task.grade,task.year);
+ const task=set.items[0],profile=useProfile(),storageKey=`olympic-writing-draft-v2-${task.id}`,submissionKey=writingSubmissionKey(task.id);
  const text=useSyncExternalStore(callback=>{window.addEventListener("writing-autosave",callback);return()=>window.removeEventListener("writing-autosave",callback)},()=>localStorage.getItem(storageKey)||"",()=>"");
  const submissionRaw=useSyncExternalStore(callback=>{window.addEventListener("training-progress",callback);return()=>window.removeEventListener("training-progress",callback)},()=>localStorage.getItem(submissionKey)||"null",()=>"null"),submitted=JSON.parse(submissionRaw) as WritingSubmissionMarker|null,submittedAttemptId=submitted?.attemptId;
  const [confirming,setConfirming]=useState(false),[submitting,setSubmitting]=useState(false),[error,setError]=useState(""),[showWork,setShowWork]=useState(false),[review,setReview]=useState<{score:number;max_score:number;teacher_comment:string|null;status:string}|null>(null);
