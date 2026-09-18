@@ -96,6 +96,7 @@ export function buildWritingAttemptPayload(
       grade: task.grade,
       year: task.year,
       variant: task.tags?.includes("generated-olympiad") ? "generated" : "official",
+      authorVariant: task.tags?.find(tag=>tag.startsWith("generated-set:"))?.split(":")[1] || null,
       reviewStatus: "pending",
       fullOlympiad,
       objectiveScore,
