@@ -36,6 +36,7 @@ test("2025 Grade 11 uses reported speech rather than modal-verb requirement", ()
   const task = grade11Writing2025.items[0];
   assert.ok(task.requirements?.some(value => /reported speech/i.test(value)));
   assert.ok(!task.requirements?.some(value => /modal verbs/i.test(value)));
+  assert.ok(task.requirements?.some(value => /title is included.*180.*250/i.test(value)));
 });
 
 test("2025 Grade 7-8 Writing keeps the official word limit and alien-story constraints", () => {
