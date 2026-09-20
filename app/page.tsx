@@ -31,5 +31,9 @@ export default function Landing(){
         <Link href="/guide">? Как пользоваться</Link>
       </div>
     </nav>
+    <footer className="wow-developer-credit">
+      <span>Разработчик:</span>
+      <strong>Лебедева Маргарита Геннадьевна</strong>
+    </footer>
   </main>
 }
