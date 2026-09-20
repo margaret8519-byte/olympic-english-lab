@@ -3,7 +3,7 @@ import Link from"next/link";
 import{ArrowLeft,BookOpenCheck,CheckCircle2,ClipboardCheck,GraduationCap,Headphones,KeyRound,Mic2,PenLine,School,Target,Trophy,Users}from"lucide-react";
 
 const studentSteps=[
-  {icon:GraduationCap,title:"1. Выбери свой класс",text:"Нажми «Пройти тренировку», введи имя и фамилию и выбери класс. Класс определяет уровень заданий."},
+  {icon:GraduationCap,title:"1. Введи данные и выбери класс",text:"Нажми «Пройти тренировку», введи имя и фамилию и выбери класс. Если учитель дал тебе код класса — введи его. Если кода нет, ничего в это поле не вводи и продолжай. Класс определяет уровень заданий."},
   {icon:Trophy,title:"2. Выбери режим",text:"«Официальная тренировка» использует проверенный банк заданий «Взлёта» прошлых лет. «Авторская тренировка» — новые варианты OLYMPIC ENGLISH LAB."},
   {icon:Headphones,title:"3. Выполни письменные разделы",text:"Проходи Listening, Reading, Use of English и Writing. В полном раунде ответы сохраняются по ходу работы."},
   {icon:Mic2,title:"4. Speaking — отдельно",text:"Для 9–11 классов устная часть открывается отдельной тренировкой и не входит в письменный раунд."},
