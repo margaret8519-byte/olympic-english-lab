@@ -125,10 +125,14 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
-  const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
-  const listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
+  const completeYears=[...new Set(listeningGroups.map(group=>group.year))].filter(year=>
+    ["reading","use-of-english"].every(section=>objective.filter(question=>question.source==="official-vsosh-vzlet"&&question.year===year&&question.section===section&&!question.needsReview&&question.acceptedAnswers.length).length>=20)
+    &&writings.some(question=>question.source==="official-vsosh-vzlet"&&question.year===year));
+  const selectedYear=Math.max(...completeYears);
+  const listeningGroup=selectListeningGroup(listeningGroups.filter(group=>group.year===selectedYear),history,lastListeningGroupId,rng);
+  const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"&&question.year===selectedYear),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet"&&question.year===selectedYear);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng).map(q=>q.id);
+  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,20,rng).map(q=>q.id);
   const last=new Set(lastIds),writing=[...officialWritings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }

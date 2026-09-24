@@ -378,3 +378,6 @@
     white-space:normal;
   }
 }
+
+.mobile-category-nav{display:none}
+@media(max-width:900px){.mobile-category-nav{display:flex;gap:8px;overflow-x:auto;max-width:100%;scrollbar-width:thin;z-index:9}.mobile-category-nav a{display:flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;padding:8px 12px;font-size:14px;font-weight:700;border:1px solid transparent;pointer-events:auto;touch-action:manipulation}.mobile-category-nav a svg{width:18px;height:18px}.mobile-category-nav a.active{color:white}.sidebar:not(.open){pointer-events:none}}
