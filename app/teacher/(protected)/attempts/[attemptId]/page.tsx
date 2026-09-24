@@ -1,1 +1,0 @@
-import{TeacherAttemptDetail}from"@/components/teacher/TeacherViews";export default async function Page({params}:{params:Promise<{attemptId:string}>}){const{attemptId}=await params;return <TeacherAttemptDetail attemptId={attemptId}/>}
