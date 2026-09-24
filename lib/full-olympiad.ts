@@ -125,8 +125,11 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
-  const listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
-  const selectedYear=listeningGroup?.year??Math.max(...objective.filter(question=>question.source==="official-vsosh-vzlet").map(question=>question.year));
+  const completeYears=[...new Set(listeningGroups.map(group=>group.year))].filter(year=>
+    ["reading","use-of-english"].every(section=>objective.filter(question=>question.source==="official-vsosh-vzlet"&&question.year===year&&question.section===section&&!question.needsReview&&question.acceptedAnswers.length).length>=20)
+    &&writings.some(question=>question.source==="official-vsosh-vzlet"&&question.year===year));
+  const selectedYear=Math.max(...completeYears);
+  const listeningGroup=selectListeningGroup(listeningGroups.filter(group=>group.year===selectedYear),history,lastListeningGroupId,rng);
   const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"&&question.year===selectedYear),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet"&&question.year===selectedYear);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
   for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,20,rng).map(q=>q.id);
