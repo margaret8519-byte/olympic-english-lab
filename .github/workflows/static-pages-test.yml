@@ -1,0 +1,27 @@
+name: Static Pages Test
+
+on:
+  push:
+    branches:
+      - github-pages-static-test
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAGES: "true"
+      NEXT_PUBLIC_BASE_PATH: /olympic-english-lab
+      NEXT_PUBLIC_SUPABASE_URL: https://mrvanjghovfpedcdqzzb.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_WiABeNwFKOAVrPBBIwV7kg_wtTnWfWK
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: test -f out/index.html
