@@ -2,10 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Landing(){
+  const basePath=process.env.NEXT_PUBLIC_BASE_PATH||"";
   return <main className="wow-landing">
     <div className="wow-landing-frame">
       <Image
-        src="/landing-wow.webp"
+        src={`${basePath}/landing-wow.webp`}
         alt="Olympic English Lab — интерактивный олимпиадный тренажёр"
         fill
         priority
