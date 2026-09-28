@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function teacherAuthErrorMessage(error: unknown) {
@@ -17,8 +16,12 @@ export function teacherAuthErrorMessage(error: unknown) {
   return "Не удалось выполнить вход. Попробуйте ещё раз.";
 }
 
+function teacherHome() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  return `${basePath}/teacher/`;
+}
+
 export default function TeacherAuthForm({ mode }: { mode: "login" | "register" }) {
-  const router = useRouter();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -47,24 +50,21 @@ export default function TeacherAuthForm({ mode }: { mode: "login" | "register" }
         if (authError) {
           setError(teacherAuthErrorMessage(authError));
         } else if (data.session) {
-          router.replace("/teacher");
-          router.refresh();
+          window.location.assign(teacherHome());
+          return;
         } else {
           setMessage("Аккаунт создан. Подтвердите email, затем войдите.");
         }
       } else {
-        const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
         if (authError) {
           setError(teacherAuthErrorMessage(authError));
         } else {
-          const { data: profile, error: profileError } = await supabase.from("teacher_profiles").select("id").eq("id", data.user.id).maybeSingle();
-          if (profileError || !profile) {
-            await supabase.auth.signOut({ scope: "local" });
-            setError(profileError ? teacherAuthErrorMessage(profileError) : "У этого аккаунта нет профиля учителя.");
-          } else {
-            router.replace("/teacher");
-            router.refresh();
-          }
+          // On GitHub Pages a hard navigation is more reliable than a Next client
+          // transition because every protected page is a pre-rendered static file.
+          // The protected teacher layout verifies the teacher profile after reload.
+          window.location.assign(teacherHome());
+          return;
         }
       }
     } catch (error) {
