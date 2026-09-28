@@ -1,4 +1,4 @@
-name: Static Pages Test
+name: Deploy Static Olympic English Lab
 
 on:
   push:
@@ -7,10 +7,19 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     env:
       GITHUB_PAGES: "true"
       NEXT_PUBLIC_BASE_PATH: /olympic-english-lab
@@ -22,12 +31,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/configure-pages@v5
       - run: npm ci
       - run: npm run build
       - run: test -f out/index.html
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-pages-artifact@v4
         with:
-          name: github-pages-static-export
           path: out
-          if-no-files-found: error
-          retention-days: 1
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
