@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: read
   contents: read
   pages: write
   id-token: write
@@ -22,20 +21,29 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      GITHUB_PAGES: "true"
+      NEXT_PUBLIC_BASE_PATH: /olympic-english-lab
+      NEXT_PUBLIC_SUPABASE_URL: https://mrvanjghovfpedcdqzzb.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_WiABeNwFKOAVrPBBIwV7kg_wtTnWfWK
     steps:
-      - name: Download verified static export
-        uses: actions/download-artifact@v4
+      - name: Checkout fixed static version
+        uses: actions/checkout@v4
         with:
-          name: github-pages-static-export
-          path: site
-          run-id: 36040132301
-          github-token: ${{ github.token }}
+          ref: github-pages-static-test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: npm run build
+      - run: test -f out/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: site
+          path: out
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
