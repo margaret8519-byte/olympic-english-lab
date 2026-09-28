@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function teacherAuthErrorMessage(error: unknown) {
@@ -18,10 +17,22 @@ export function teacherAuthErrorMessage(error: unknown) {
 }
 
 export default function TeacherAuthForm({ mode }: { mode: "login" | "register" }) {
-  const router = useRouter();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+
+  async function openTeacherWorkspace(supabase: ReturnType<typeof createClient>) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      setError("Вход выполнен, но сессия не сохранилась. Обновите страницу и попробуйте ещё раз.");
+      return false;
+    }
+
+    // Use a full navigation instead of the client router so the protected
+    // server layout receives the freshly-written Supabase auth cookies.
+    window.location.assign("/teacher");
+    return true;
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,8 +58,7 @@ export default function TeacherAuthForm({ mode }: { mode: "login" | "register" }
         if (authError) {
           setError(teacherAuthErrorMessage(authError));
         } else if (data.session) {
-          router.replace("/teacher");
-          router.refresh();
+          await openTeacherWorkspace(supabase);
         } else {
           setMessage("Аккаунт создан. Подтвердите email, затем войдите.");
         }
@@ -56,14 +66,15 @@ export default function TeacherAuthForm({ mode }: { mode: "login" | "register" }
         const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
         if (authError) {
           setError(teacherAuthErrorMessage(authError));
+        } else if (!data.session) {
+          setError("Вход выполнен, но сессия не сохранилась. Обновите страницу и попробуйте ещё раз.");
         } else {
           const { data: profile, error: profileError } = await supabase.from("teacher_profiles").select("id").eq("id", data.user.id).maybeSingle();
           if (profileError || !profile) {
             await supabase.auth.signOut({ scope: "local" });
             setError(profileError ? teacherAuthErrorMessage(profileError) : "У этого аккаунта нет профиля учителя.");
           } else {
-            router.replace("/teacher");
-            router.refresh();
+            await openTeacherWorkspace(supabase);
           }
         }
       }
