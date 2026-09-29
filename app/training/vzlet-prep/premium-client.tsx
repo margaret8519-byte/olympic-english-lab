@@ -262,7 +262,7 @@ export default function PremiumVzletPrep() {
         <section className={styles.hero}>
           <div>
             <small>SMART PREP · 2026</small>
-            <h1>Олимпиадная подготовка без ощущения «детского тренажёра»</h1>
+            <h1>Олимпиадная подготовка к «Взлёту»</h1>
             <p>Не угадывание по картинке, а работа с признаками: контекст, логика, исключение distractors и точные факты.</p>
           </div>
           <div className={styles.heroPanel}>
