@@ -1,11 +1,5 @@
-import VzletPrepClient from "./client";
-import VisualChallenge from "./visual-challenge";
+import SimpleVzletPrep from "./simple-client";
 
 export default function VzletPrepPage() {
-  return (
-    <>
-      <VzletPrepClient />
-      <VisualChallenge />
-    </>
-  );
+  return <SimpleVzletPrep />;
 }
