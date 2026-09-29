@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AppHeader } from "@/components/Brand";
 import {
+  type VzletCard,
   type VzletGradeKey,
   type VzletQuestion,
   type VzletStage,
@@ -68,11 +69,11 @@ const visualByQuestion: Record<string, VisualScene> = {
   "910-6": { icons: ["🔔", "🧠", "❓"], label: "IDIOM SCENE", hint: "звучит знакомо", tone: "gold" },
   "910-7": { icons: ["📞", "🧠", "💨"], label: "IDIOM SCENE", hint: "совсем вылетело из головы", tone: "violet" },
   "910-8": { icons: ["🧠", "📌", "⏰"], label: "IDIOM SCENE", hint: "держи это в уме", tone: "mint" },
-  "910-9": { icons: ["🪐", "⏳", "🎹"], label: "FILM & COMPOSER", hint: "space • time • organ", tone: "blue" },
-  "910-10": { icons: ["🪄", "🏰", "✨"], label: "FILM & COMPOSER", hint: "magic • castle • celesta", tone: "violet" },
-  "910-11": { icons: ["🏴‍☠️", "⛵", "🧭"], label: "FILM & COMPOSER", hint: "pirates • sea • orchestra", tone: "coral" },
-  "910-12": { icons: ["🌌", "🎹", "⏱️"], label: "FILM & COMPOSER", hint: "cosmos • organ • time", tone: "blue" },
-  "910-13": { icons: ["💍", "⛰️", "🗺️"], label: "FILM & COMPOSER", hint: "Middle-earth • journey • leitmotifs", tone: "gold" },
+  "910-9": { icons: ["🎼", "🎹", "⏱️"], label: "MUSIC CLUE", hint: "organ • pulse • expansive score", tone: "blue" },
+  "910-10": { icons: ["🎼", "🔔", "✨"], label: "MUSIC CLUE", hint: "celesta • orchestra • memorable motif", tone: "violet" },
+  "910-11": { icons: ["🎼", "🥁", "⚡"], label: "MUSIC CLUE", hint: "2003 • action • bold orchestral rhythm", tone: "coral" },
+  "910-12": { icons: ["🎹", "🎼", "🔊"], label: "MUSIC CLUE", hint: "organ • sustained chords • large-scale sound", tone: "blue" },
+  "910-13": { icons: ["🎻", "📯", "🎼"], label: "MUSIC CLUE", hint: "leitmotifs • orchestra • 2012", tone: "gold" },
   "910-14": { icons: ["🏰", "⛰️", "🐉"], label: "GREAT BRITAIN", hint: "three countries on one island", tone: "mint" },
   "910-15": { icons: ["🧩", "🇬🇧", "☘️"], label: "GREAT BRITAIN", hint: "four parts make the United Kingdom", tone: "blue" },
   "910-16": { icons: ["🏰", "⛰️", "🎻"], label: "GREAT BRITAIN", hint: "Scotland • historic capital", tone: "violet" },
@@ -89,9 +90,9 @@ const visualByQuestion: Record<string, VisualScene> = {
   "11-6": { icons: ["💼", "🪙", "🚀"], label: "IDIOM SCENE", hint: "запуск почти без бюджета", tone: "gold" },
   "11-7": { icons: ["🔍", "❌", "📝"], label: "IDIOM SCENE", hint: "ищет недостатки в каждой мелочи", tone: "coral" },
   "11-8": { icons: ["👏", "🏆", "✅"], label: "IDIOM SCENE", hint: "похвала тому, кто её заслужил", tone: "violet" },
-  "11-9": { icons: ["💻", "🟩", "☎️"], label: "FILM & COMPOSER", hint: "code • simulation • 1999", tone: "mint" },
-  "11-10": { icons: ["🤖", "🛡️", "⚡"], label: "FILM & COMPOSER", hint: "superheroes • AI villain • two composers", tone: "coral" },
-  "11-11": { icons: ["⏱️", "🏜️", "🎼"], label: "FILM & COMPOSER", hint: "time-bending city + desert planet", tone: "gold" },
+  "11-9": { icons: ["🎼", "🥁", "🟩"], label: "MUSIC CLUE", hint: "electronic • orchestral • 1999", tone: "mint" },
+  "11-10": { icons: ["🎼", "⚡", "🥁"], label: "MUSIC CLUE", hint: "2015 • action • two-composer score", tone: "coral" },
+  "11-11": { icons: ["🎼", "⏱️", "🌌"], label: "MUSIC CLUE", hint: "time • texture • large-scale sci-fi sound", tone: "gold" },
   "11-12": { icons: ["⚔️", "🛡️", "🏰"], label: "BRITISH HISTORY", hint: "1066 • conquest • Hastings", tone: "coral" },
   "11-13": { icons: ["📜", "👑", "✒️"], label: "BRITISH HISTORY", hint: "1215 • king • charter", tone: "gold" },
   "11-14": { icons: ["🌹", "⚔️", "👑"], label: "BRITISH HISTORY", hint: "1485 • Bosworth • new dynasty", tone: "coral" },
@@ -141,12 +142,34 @@ function modeSubtitle(mode: Mode, grade: VzletGradeKey, mistakes: number) {
   return "Все темы вперемешку";
 }
 
+function topicName(tag: string) {
+  if (tag === "Idioms") return "Идиомы";
+  if (tag === "Soundtracks") return "Фильм и композитор";
+  if (tag === "Animated films") return "Мультфильмы";
+  if (tag === "USA") return "Штаты США";
+  if (tag === "Great Britain") return "Great Britain";
+  if (tag === "British history") return "British History";
+  return tag;
+}
+
+function flashSides(card: VzletCard) {
+  const parts = card.front.split(" — ");
+  if (parts.length > 1) {
+    return {
+      front: parts[0],
+      answer: parts.slice(1).join(" — "),
+      detail: card.back,
+    };
+  }
+  return { front: card.front, answer: card.back, detail: "" };
+}
+
 function visualFor(question: VzletQuestion): VisualScene {
   const exact = visualByQuestion[question.id];
   if (exact) return exact;
   if (question.tag === "Idioms") return { icons: ["💬", "🧠", "✨"], label: "IDIOM SCENE", hint: "контекст → смысл → выражение", tone: "violet" };
   if (question.tag === "Animated films") return { icons: ["🎬", "🧩", "⭐"], label: "FILM CLUE", hint: "сюжет → название", tone: "blue" };
-  if (question.tag === "Soundtracks") return { icons: ["🎞️", "🎼", "👤"], label: "FILM & COMPOSER", hint: "фильм ↔ композитор", tone: "violet" };
+  if (question.tag === "Soundtracks") return { icons: ["🎼", "🎧", "🎹"], label: "MUSIC CLUE", hint: "характер музыки → фильм или композитор", tone: "violet" };
   if (question.tag === "USA") return { icons: ["🗺️", "🏛️", "⭐"], label: "USA CLUE", hint: "штат ↔ столица ↔ nickname", tone: "gold" };
   if (question.tag === "Great Britain") return { icons: ["🇬🇧", "🗺️", "🏰"], label: "GREAT BRITAIN", hint: "страны UK • столицы • география", tone: "blue" };
   return { icons: ["👑", "📜", "🏰"], label: "BRITISH HISTORY", hint: "дата ↔ событие ↔ монарх", tone: "coral" };
@@ -170,6 +193,7 @@ export default function SimpleVzletPrep() {
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
   const [mistakes, setMistakes] = useState<string[]>([]);
+  const [wrongTags, setWrongTags] = useState<string[]>([]);
   const [cardIndex, setCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
 
@@ -219,6 +243,10 @@ export default function SimpleVzletPrep() {
   const active = quiz[index];
   const visual = active ? visualFor(active) : null;
   const card = studyCards.length ? studyCards[cardIndex % studyCards.length] : null;
+  const cardView = card ? flashSides(card) : null;
+  const percent = quiz.length ? Math.round((score / quiz.length) * 100) : 0;
+  const roundProgress = quiz.length ? ((index + (selected !== null ? 1 : 0)) / quiz.length) * 100 : 0;
+  const repeatTopics = wrongTags.slice(0, 2).map(topicName);
 
   function saveMistakes(next: string[]) {
     setMistakes(next);
@@ -245,6 +273,7 @@ export default function SimpleVzletPrep() {
     setSelected(null);
     setScore(0);
     setFinished(false);
+    setWrongTags([]);
     setCardIndex(0);
     setShowAnswer(false);
   }
@@ -261,8 +290,9 @@ export default function SimpleVzletPrep() {
     if (optionIndex === active.answer) {
       setScore((value) => value + 1);
       if (mistakes.includes(active.id)) saveMistakes(mistakes.filter((id) => id !== active.id));
-    } else if (!mistakes.includes(active.id)) {
-      saveMistakes([...mistakes, active.id]);
+    } else {
+      if (!mistakes.includes(active.id)) saveMistakes([...mistakes, active.id]);
+      setWrongTags((tags) => (tags.includes(active.tag) ? tags : [...tags, active.tag]));
     }
   }
 
@@ -275,8 +305,6 @@ export default function SimpleVzletPrep() {
     setIndex((value) => value + 1);
     setSelected(null);
   }
-
-  const percent = quiz.length ? Math.round((score / quiz.length) * 100) : 0;
 
   return (
     <main className={styles.page}>
@@ -331,6 +359,8 @@ export default function SimpleVzletPrep() {
               {!!quiz.length && !finished && <span>{index + 1} / {quiz.length}</span>}
             </div>
 
+            {!!quiz.length && !finished && <div className={styles.roundProgress} aria-label={`Прогресс ${index + 1} из ${quiz.length}`}><span style={{ width: `${roundProgress}%` }} /></div>}
+
             {!quiz.length && <div className={styles.empty}><Target /><h3>Для этой комбинации пока нет вопросов</h3><p>Выбери «Все темы» или другую тренировку выше.</p></div>}
 
             {!!quiz.length && !finished && active && visual && <>
@@ -354,21 +384,34 @@ export default function SimpleVzletPrep() {
                   })}</div>
                 </div>
               </div>
-              {selected !== null && <div className={styles.feedback}><div><b>{selected === active.answer ? "Верно — визуальная ассоциация сработала" : "Запомни связку картинки и факта"}</b><p>{active.explanation}</p></div><button onClick={nextQuestion}>{index + 1 === quiz.length ? "Показать результат" : "Следующий вопрос"}<ArrowRight size={17} /></button></div>}
+              {selected !== null && <div className={styles.feedback}><div><b>{selected === active.answer ? "Верно — визуальная ассоциация сработала" : "Запомни связку подсказки и факта"}</b><p>{active.explanation}</p></div><button onClick={nextQuestion}>{index + 1 === quiz.length ? "Показать результат" : "Следующий вопрос"}<ArrowRight size={17} /></button></div>}
             </>}
 
-            {finished && <div className={styles.result}><Trophy /><div><small>ГОТОВО</small><h3>{score} / {quiz.length} · {percent}%</h3><p>{percent >= 80 ? "Отлично. Можно переходить к другой теме." : "Пройди раунд ещё раз — ошибки уже сохранены для повторения."}</p></div><button onClick={() => start(mode)}><RotateCcw size={17} /> Ещё раз</button></div>}
+            {finished && <div className={styles.result}>
+              <Trophy />
+              <div>
+                <small>ГОТОВО</small>
+                <h3>{score} / {quiz.length} · {percent}%</h3>
+                <p>{percent >= 80 ? "Сильный результат. Закрепи только то, где были ошибки." : "Пройди раунд ещё раз после короткого повторения слабых тем."}</p>
+                <div className={styles.resultAdvice}>
+                  <strong>{repeatTopics.length ? "Повтори в первую очередь:" : "Слабых тем в этом раунде не найдено."}</strong>
+                  {!!repeatTopics.length && <div className={styles.resultTags}>{repeatTopics.map((topic) => <span key={topic}>{topic}</span>)}</div>}
+                </div>
+              </div>
+              <button onClick={() => start(mode)}><RotateCcw size={17} /> Ещё раз</button>
+            </div>}
           </div>
 
           <aside className={styles.studyCard}>
             <div className={styles.studyHead}><div><small>ПЕРЕД ТЕСТОМ</small><h2>Быстро повторить</h2></div><span>{studyCards.length ? cardIndex % studyCards.length + 1 : 0}/{studyCards.length}</span></div>
-            {card ? <>
+            {card && cardView ? <>
               <button className={`${styles.flash} ${showAnswer ? styles.flashAnswer : ""}`} onClick={() => setShowAnswer((value) => !value)}>
-                <div className={styles.flashMeta}><small>{card.tag}</small><em>{showAnswer ? "ЗНАЧЕНИЕ" : "ТЕРМИН"}</em></div>
-                <b>{showAnswer ? card.back : card.front}</b>
-                <span>{showAnswer ? "Нажми, чтобы снова увидеть термин" : "Сначала вспомни сам → затем открой значение"}</span>
+                <div className={styles.flashMeta}><small>{card.tag}</small><em>{showAnswer ? "ОТВЕТ" : "ВСПОМНИ"}</em></div>
+                <b>{showAnswer ? cardView.answer : cardView.front}</b>
+                {showAnswer && cardView.detail && <p className={styles.flashExtra}>{cardView.detail}</p>}
+                <span>{showAnswer ? "Нажми, чтобы снова увидеть вопрос" : "Сначала ответь сам → затем открой обратную сторону"}</span>
               </button>
-              <div className={styles.studyActions}><button onClick={() => { const utterance = new SpeechSynthesisUtterance(card.front); utterance.lang = "en-GB"; window.speechSynthesis?.speak(utterance); }}><Volume2 size={16} /> Слушать</button><button onClick={() => { setCardIndex((value) => value + 1); setShowAnswer(false); }}>Дальше <ArrowRight size={16} /></button></div>
+              <div className={styles.studyActions}><button onClick={() => { const utterance = new SpeechSynthesisUtterance(cardView.front); utterance.lang = "en-GB"; window.speechSynthesis?.speak(utterance); }}><Volume2 size={16} /> Слушать</button><button onClick={() => { setCardIndex((value) => value + 1); setShowAnswer(false); }}>Дальше <ArrowRight size={16} /></button></div>
             </> : <div className={styles.emptySmall}>Для этой темы карточек нет — сразу переходи к тесту.</div>}
           </aside>
         </section>
