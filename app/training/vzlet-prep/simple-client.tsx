@@ -27,6 +27,8 @@ import styles from "./simple.module.css";
 
 type StageFilter = "all" | VzletStage;
 type Mode = "idioms" | "film" | "culture" | "mixed" | "mistakes";
+type VisualTone = "violet" | "blue" | "mint" | "coral" | "gold";
+type VisualScene = { icons: [string, string, string]; label: string; hint: string; tone: VisualTone };
 
 const gradeOrder: VzletGradeKey[] = ["7-8", "9-10", "11"];
 
@@ -34,6 +36,71 @@ const stageTitle: Record<StageFilter, string> = {
   all: "Все темы",
   school: "Школьный этап",
   municipal: "Муниципальный этап",
+};
+
+const visualByQuestion: Record<string, VisualScene> = {
+  "78-1": { icons: ["🤝", "👀", "✅"], label: "IDIOM SCENE", hint: "двое полностью согласны", tone: "violet" },
+  "78-2": { icons: ["🎸", "👨‍👩‍👧", "🎵"], label: "IDIOM SCENE", hint: "одно качество у всей семьи", tone: "gold" },
+  "78-3": { icons: ["🏨", "🛋️", "😊"], label: "IDIOM SCENE", hint: "чужое место ощущается как дом", tone: "mint" },
+  "78-4": { icons: ["👂", "💬", "✨"], label: "IDIOM SCENE", hint: "слушаю очень внимательно", tone: "blue" },
+  "78-5": { icons: ["👜", "👀", "🎟️"], label: "IDIOM SCENE", hint: "присмотри за вещью", tone: "coral" },
+  "78-6": { icons: ["🙈", "⚠️", "➡️"], label: "IDIOM SCENE", hint: "заметил, но решил проигнорировать", tone: "violet" },
+  "78-7": { icons: ["🎸", "🌼", "🌙"], label: "FILM CLUE", hint: "музыка • семья • память", tone: "violet" },
+  "78-8": { icons: ["👨‍🍳", "🐭", "🗼"], label: "FILM CLUE", hint: "повар • маленький герой • Париж", tone: "coral" },
+  "78-9": { icons: ["🧠", "😊", "😰"], label: "FILM CLUE", hint: "разум • эмоции • взросление", tone: "blue" },
+  "78-10": { icons: ["🐉", "🛡️", "🌊"], label: "FILM CLUE", hint: "викинг • дружба • дракон", tone: "mint" },
+  "78-11": { icons: ["🌿", "🏚️", "🟢"], label: "FILM CLUE", hint: "болото • покой • необычный герой", tone: "mint" },
+  "78-12": { icons: ["🏎️", "🏁", "🏜️"], label: "FILM CLUE", hint: "гонка • дорога • важнее победы", tone: "coral" },
+  "78-13": { icons: ["🌴", "🎬", "🌉"], label: "USA CLUE", hint: "Pacific coast • cinema • tech", tone: "gold" },
+  "78-14": { icons: ["⭐", "🤠", "🌵"], label: "USA CLUE", hint: "Lone Star • South • wide spaces", tone: "coral" },
+  "78-15": { icons: ["🍎", "🏙️", "🏛️"], label: "USA CLUE", hint: "famous city ≠ state capital", tone: "violet" },
+  "78-16": { icons: ["🌺", "🌋", "🏝️"], label: "USA CLUE", hint: "islands • volcanoes • aloha", tone: "mint" },
+  "78-17": { icons: ["☀️", "🐊", "🌴"], label: "USA CLUE", hint: "sunshine • peninsula • warm coast", tone: "gold" },
+  "78-18": { icons: ["❄️", "🏔️", "🐻"], label: "USA CLUE", hint: "largest state • northern frontier", tone: "blue" },
+  "78-19": { icons: ["⛰️", "🗿", "🌾"], label: "USA CLUE", hint: "Mount Rushmore • Great Plains", tone: "gold" },
+  "78-20": { icons: ["🌲", "🏔️", "🌧️"], label: "USA CLUE", hint: "Evergreen State • Pacific Northwest", tone: "mint" },
+
+  "910-1": { icons: ["🏫", "➡️", "🚶"], label: "IDIOM SCENE", hint: "совсем рядом", tone: "mint" },
+  "910-2": { icons: ["🎓", "✨", "😊"], label: "IDIOM SCENE", hint: "давняя мечта наконец сбылась", tone: "violet" },
+  "910-3": { icons: ["⚖️", "👂", "⏳"], label: "IDIOM SCENE", hint: "не решай, пока не услышал обе стороны", tone: "blue" },
+  "910-4": { icons: ["🌧️", "💡", "⬇️"], label: "IDIOM SCENE", hint: "ситуация становится всё хуже", tone: "coral" },
+  "910-5": { icons: ["💧", "🌊", "500"], label: "IDIOM SCENE", hint: "слишком мало по сравнению с нужным", tone: "blue" },
+  "910-6": { icons: ["🔔", "🧠", "❓"], label: "IDIOM SCENE", hint: "звучит знакомо", tone: "gold" },
+  "910-7": { icons: ["📞", "🧠", "💨"], label: "IDIOM SCENE", hint: "совсем вылетело из головы", tone: "violet" },
+  "910-8": { icons: ["🧠", "📌", "⏰"], label: "IDIOM SCENE", hint: "держи это в уме", tone: "mint" },
+  "910-9": { icons: ["🪐", "⏳", "🎹"], label: "FILM & COMPOSER", hint: "space • time • organ", tone: "blue" },
+  "910-10": { icons: ["🪄", "🏰", "✨"], label: "FILM & COMPOSER", hint: "magic • castle • celesta", tone: "violet" },
+  "910-11": { icons: ["🏴‍☠️", "⛵", "🧭"], label: "FILM & COMPOSER", hint: "pirates • sea • orchestra", tone: "coral" },
+  "910-12": { icons: ["🌌", "🎹", "⏱️"], label: "FILM & COMPOSER", hint: "cosmos • organ • time", tone: "blue" },
+  "910-13": { icons: ["💍", "⛰️", "🗺️"], label: "FILM & COMPOSER", hint: "Middle-earth • journey • leitmotifs", tone: "gold" },
+  "910-14": { icons: ["🏰", "⛰️", "🐉"], label: "GREAT BRITAIN", hint: "three countries on one island", tone: "mint" },
+  "910-15": { icons: ["🧩", "🇬🇧", "☘️"], label: "GREAT BRITAIN", hint: "four parts make the United Kingdom", tone: "blue" },
+  "910-16": { icons: ["🏰", "⛰️", "🎻"], label: "GREAT BRITAIN", hint: "Scotland • historic capital", tone: "violet" },
+  "910-17": { icons: ["🐉", "🏟️", "🏰"], label: "GREAT BRITAIN", hint: "Wales • red dragon • capital", tone: "coral" },
+  "910-18": { icons: ["🏔️", "🥾", "🌧️"], label: "GREAT BRITAIN", hint: "highest point in the UK", tone: "blue" },
+  "910-19": { icons: ["🌊", "⛴️", "🇫🇷"], label: "GREAT BRITAIN", hint: "water between England and France", tone: "mint" },
+  "910-20": { icons: ["⚓", "☘️", "🏙️"], label: "GREAT BRITAIN", hint: "Northern Ireland • capital", tone: "gold" },
+
+  "11-1": { icons: ["🧑‍💼", "🪢", "✅"], label: "IDIOM SCENE", hint: "осваиваешь, как всё устроено", tone: "blue" },
+  "11-2": { icons: ["📦", "💡", "🚀"], label: "IDIOM SCENE", hint: "нужна нестандартная идея", tone: "violet" },
+  "11-3": { icons: ["🏗️", "⏱️", "😅"], label: "IDIOM SCENE", hint: "очень трудная задача", tone: "coral" },
+  "11-4": { icons: ["🔁", "1️⃣", "🧩"], label: "IDIOM SCENE", hint: "всё снова с самого начала", tone: "gold" },
+  "11-5": { icons: ["🎟️", "🤏", "🍀"], label: "IDIOM SCENE", hint: "вероятность очень маленькая", tone: "mint" },
+  "11-6": { icons: ["💼", "🪙", "🚀"], label: "IDIOM SCENE", hint: "запуск почти без бюджета", tone: "gold" },
+  "11-7": { icons: ["🔍", "❌", "📝"], label: "IDIOM SCENE", hint: "ищет недостатки в каждой мелочи", tone: "coral" },
+  "11-8": { icons: ["👏", "🏆", "✅"], label: "IDIOM SCENE", hint: "похвала тому, кто её заслужил", tone: "violet" },
+  "11-9": { icons: ["💻", "🟩", "☎️"], label: "FILM & COMPOSER", hint: "code • simulation • 1999", tone: "mint" },
+  "11-10": { icons: ["🤖", "🛡️", "⚡"], label: "FILM & COMPOSER", hint: "superheroes • AI villain • two composers", tone: "coral" },
+  "11-11": { icons: ["⏱️", "🏜️", "🎼"], label: "FILM & COMPOSER", hint: "time-bending city + desert planet", tone: "gold" },
+  "11-12": { icons: ["⚔️", "🛡️", "🏰"], label: "BRITISH HISTORY", hint: "1066 • conquest • Hastings", tone: "coral" },
+  "11-13": { icons: ["📜", "👑", "✒️"], label: "BRITISH HISTORY", hint: "1215 • king • charter", tone: "gold" },
+  "11-14": { icons: ["🌹", "⚔️", "👑"], label: "BRITISH HISTORY", hint: "1485 • Bosworth • new dynasty", tone: "coral" },
+  "11-15": { icons: ["👑", "⛪", "📜"], label: "BRITISH HISTORY", hint: "1534 • Crown • Church", tone: "violet" },
+  "11-16": { icons: ["⛵", "🌊", "👑"], label: "BRITISH HISTORY", hint: "1588 • Armada • queen", tone: "blue" },
+  "11-17": { icons: ["👑", "🤝", "🏴"], label: "BRITISH HISTORY", hint: "1603 • one monarch • two crowns", tone: "mint" },
+  "11-18": { icons: ["⚖️", "👑", "📜"], label: "BRITISH HISTORY", hint: "1649 • Charles I", tone: "coral" },
+  "11-19": { icons: ["👑", "🎉", "🏰"], label: "BRITISH HISTORY", hint: "1660 • monarchy returns", tone: "gold" },
+  "11-20": { icons: ["🔄", "👑", "📜"], label: "BRITISH HISTORY", hint: "1688–1689 • revolution • rights", tone: "violet" },
 };
 
 function gradeFromProfile(grade: number): VzletGradeKey {
@@ -56,19 +123,41 @@ function isCulture(question: VzletQuestion) {
 
 function modeName(mode: Mode, grade: VzletGradeKey) {
   if (mode === "idioms") return "Идиомы";
-  if (mode === "film") return grade === "7-8" ? "Узнай мультфильм" : "Саундтреки";
+  if (mode === "film") return grade === "7-8" ? "Узнай мультфильм" : "Фильм и композитор";
   if (mode === "culture") return grade === "7-8" ? "Штаты США" : grade === "9-10" ? "Great Britain" : "British History";
   if (mode === "mistakes") return "Мои ошибки";
   return "Смешанный раунд";
 }
 
-function visualFor(question: VzletQuestion) {
-  if (question.tag === "Idioms") return { icon: "💬", label: "IDIOMS", hint: "Прочитай контекст и выбери выражение" };
-  if (question.tag === "Animated films") return { icon: "🎬", label: "FILM CLUE", hint: "Сюжетная подсказка → название" };
-  if (question.tag === "Soundtracks") return { icon: "🎧", label: "SOUNDTRACK", hint: "Фильм ↔ композитор ↔ звучание" };
-  if (question.tag === "USA") return { icon: "🇺🇸", label: "USA", hint: "Штат ↔ столица ↔ nickname" };
-  if (question.tag === "Great Britain") return { icon: "🇬🇧", label: "GREAT BRITAIN", hint: "География и страны Великобритании" };
-  return { icon: "👑", label: "BRITISH HISTORY", hint: "Дата ↔ событие ↔ правитель" };
+function modeSubtitle(mode: Mode, grade: VzletGradeKey, mistakes: number) {
+  if (mode === "idioms") return "Фразы в контексте";
+  if (mode === "film") return grade === "7-8" ? "Сюжет • герой • ключевая деталь" : "Фильм ↔ композитор ↔ музыкальная подсказка";
+  if (mode === "culture") {
+    if (grade === "7-8") return "Столицы • nicknames • факты";
+    if (grade === "9-10") return "Страны UK • столицы • география";
+    return "Даты • события • монархи";
+  }
+  if (mode === "mistakes") return `${mistakes} сохранено для повторения`;
+  return "Все темы вперемешку";
+}
+
+function visualFor(question: VzletQuestion): VisualScene {
+  const exact = visualByQuestion[question.id];
+  if (exact) return exact;
+  if (question.tag === "Idioms") return { icons: ["💬", "🧠", "✨"], label: "IDIOM SCENE", hint: "контекст → смысл → выражение", tone: "violet" };
+  if (question.tag === "Animated films") return { icons: ["🎬", "🧩", "⭐"], label: "FILM CLUE", hint: "сюжет → название", tone: "blue" };
+  if (question.tag === "Soundtracks") return { icons: ["🎞️", "🎼", "👤"], label: "FILM & COMPOSER", hint: "фильм ↔ композитор", tone: "violet" };
+  if (question.tag === "USA") return { icons: ["🗺️", "🏛️", "⭐"], label: "USA CLUE", hint: "штат ↔ столица ↔ nickname", tone: "gold" };
+  if (question.tag === "Great Britain") return { icons: ["🇬🇧", "🗺️", "🏰"], label: "GREAT BRITAIN", hint: "страны UK • столицы • география", tone: "blue" };
+  return { icons: ["👑", "📜", "🏰"], label: "BRITISH HISTORY", hint: "дата ↔ событие ↔ монарх", tone: "coral" };
+}
+
+function visualToneClass(tone: VisualTone) {
+  if (tone === "blue") return styles.visualBlue;
+  if (tone === "mint") return styles.visualMint;
+  if (tone === "coral") return styles.visualCoral;
+  if (tone === "gold") return styles.visualGold;
+  return styles.visualViolet;
 }
 
 export default function SimpleVzletPrep() {
@@ -202,7 +291,7 @@ export default function SimpleVzletPrep() {
           <div>
             <small>ПОДГОТОВКА БЕЗ ЛИШНЕГО</small>
             <h1>Выбери класс → этап → тренировку</h1>
-            <p>Никаких длинных списков: одна тема, один раунд, объяснение сразу после ответа.</p>
+            <p>Одна тема, один короткий раунд и визуальная подсказка перед каждым вопросом.</p>
           </div>
           <div className={styles.heroBadge}><Target /><b>{group.label}</b><span>{group.subtitle}</span></div>
         </section>
@@ -225,12 +314,12 @@ export default function SimpleVzletPrep() {
         <section className={styles.training}>
           <div className={styles.trainingHead}>
             <div className={styles.stepTitle}><span>3</span><b>Что тренируем?</b></div>
-            <p>{stage === "school" ? "На школьном этапе показываем только школьные темы." : stage === "municipal" ? "На муниципальном этапе — только нужные для него темы." : "Можно тренировать все заявленные темы."}</p>
+            <p>{stage === "school" ? "Здесь только темы школьного этапа." : stage === "municipal" ? "Здесь только темы муниципального этапа." : "Можно тренировать все заявленные темы."}</p>
           </div>
           <div className={styles.modeGrid}>
             {availableModes.map((item) => {
               const Icon = item === "idioms" ? Brain : item === "film" ? Film : item === "culture" ? Map : item === "mistakes" ? RotateCcw : Target;
-              return <button key={item} className={`${styles.modeCard} ${mode === item ? styles.selectedMode : ""}`} onClick={() => start(item)}><Icon /><b>{modeName(item, gradeKey)}</b><span>{item === "idioms" ? "Фразы в контексте" : item === "film" ? "Сюжет или композитор" : item === "culture" ? "Страны, штаты, история" : item === "mistakes" ? `${mistakes.length} сохранено` : "Всё вперемешку"}</span><em>Открыть <ArrowRight size={15} /></em></button>;
+              return <button key={item} className={`${styles.modeCard} ${mode === item ? styles.selectedMode : ""}`} onClick={() => start(item)}><Icon /><b>{modeName(item, gradeKey)}</b><span>{modeSubtitle(item, gradeKey, mistakes.length)}</span><em>Открыть <ArrowRight size={15} /></em></button>;
             })}
           </div>
         </section>
@@ -246,7 +335,13 @@ export default function SimpleVzletPrep() {
 
             {!!quiz.length && !finished && active && visual && <>
               <div className={styles.questionLayout}>
-                <div className={styles.visualCue}><span>{visual.icon}</span><small>{visual.label}</small><p>{visual.hint}</p></div>
+                <div className={`${styles.visualCue} ${visualToneClass(visual.tone)}`}>
+                  <div className={styles.visualTop}><small>{visual.label}</small><span>LOOK → THINK → ANSWER</span></div>
+                  <div className={styles.sceneIcons} aria-hidden="true">
+                    {visual.icons.map((icon, visualIndex) => <span key={`${icon}-${visualIndex}`}>{icon}</span>)}
+                  </div>
+                  <p>{visual.hint}</p>
+                </div>
                 <div className={styles.questionBody}>
                   <div className={styles.meta}><span>{active.stage === "school" ? "Школьный" : "Муниципальный"}</span><b>{active.tag}</b></div>
                   <h3>{active.prompt}</h3>
@@ -259,7 +354,7 @@ export default function SimpleVzletPrep() {
                   })}</div>
                 </div>
               </div>
-              {selected !== null && <div className={styles.feedback}><div><b>{selected === active.answer ? "Верно" : "Запомни эту ловушку"}</b><p>{active.explanation}</p></div><button onClick={nextQuestion}>{index + 1 === quiz.length ? "Показать результат" : "Следующий вопрос"}<ArrowRight size={17} /></button></div>}
+              {selected !== null && <div className={styles.feedback}><div><b>{selected === active.answer ? "Верно — визуальная ассоциация сработала" : "Запомни связку картинки и факта"}</b><p>{active.explanation}</p></div><button onClick={nextQuestion}>{index + 1 === quiz.length ? "Показать результат" : "Следующий вопрос"}<ArrowRight size={17} /></button></div>}
             </>}
 
             {finished && <div className={styles.result}><Trophy /><div><small>ГОТОВО</small><h3>{score} / {quiz.length} · {percent}%</h3><p>{percent >= 80 ? "Отлично. Можно переходить к другой теме." : "Пройди раунд ещё раз — ошибки уже сохранены для повторения."}</p></div><button onClick={() => start(mode)}><RotateCcw size={17} /> Ещё раз</button></div>}
@@ -268,13 +363,17 @@ export default function SimpleVzletPrep() {
           <aside className={styles.studyCard}>
             <div className={styles.studyHead}><div><small>ПЕРЕД ТЕСТОМ</small><h2>Быстро повторить</h2></div><span>{studyCards.length ? cardIndex % studyCards.length + 1 : 0}/{studyCards.length}</span></div>
             {card ? <>
-              <button className={styles.flash} onClick={() => setShowAnswer((value) => !value)}><small>{card.tag}</small><b>{showAnswer ? card.back : card.front}</b><span>{showAnswer ? "Нажми, чтобы вернуть термин" : "Нажми, чтобы увидеть ответ"}</span></button>
+              <button className={`${styles.flash} ${showAnswer ? styles.flashAnswer : ""}`} onClick={() => setShowAnswer((value) => !value)}>
+                <div className={styles.flashMeta}><small>{card.tag}</small><em>{showAnswer ? "ЗНАЧЕНИЕ" : "ТЕРМИН"}</em></div>
+                <b>{showAnswer ? card.back : card.front}</b>
+                <span>{showAnswer ? "Нажми, чтобы снова увидеть термин" : "Сначала вспомни сам → затем открой значение"}</span>
+              </button>
               <div className={styles.studyActions}><button onClick={() => { const utterance = new SpeechSynthesisUtterance(card.front); utterance.lang = "en-GB"; window.speechSynthesis?.speak(utterance); }}><Volume2 size={16} /> Слушать</button><button onClick={() => { setCardIndex((value) => value + 1); setShowAnswer(false); }}>Дальше <ArrowRight size={16} /></button></div>
             </> : <div className={styles.emptySmall}>Для этой темы карточек нет — сразу переходи к тесту.</div>}
           </aside>
         </section>
 
-        <p className={styles.note}>Темы соответствуют заявленной структуре подготовки «Взлёта». Тренировочные задания авторские и не воспроизводят страницы пособий.</p>
+        <p className={styles.note}>Темы соответствуют заявленной структуре подготовки «Взлёта». Визуальные подсказки и тренировочные задания авторские и не воспроизводят страницы пособий.</p>
       </div>
     </main>
   );
