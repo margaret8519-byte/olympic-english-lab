@@ -2,14 +2,44 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpenCheck, Brain, Check, Clock3, Film, Flag, RotateCcw, Sparkles, Trophy, Volume2, X, Zap } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  BookOpenCheck,
+  Brain,
+  Check,
+  Clock3,
+  Film,
+  Flag,
+  Map,
+  RotateCcw,
+  Sparkles,
+  Target,
+  Trophy,
+  Volume2,
+  X,
+  Zap,
+} from "lucide-react";
 import { AppHeader } from "@/components/Brand";
-import { type VzletGradeKey, type VzletQuestion, type VzletStage, vzletAnimatedFilmList, vzletPrepData, vzletSoundtrackFilmList } from "@/data/vzlet-prep";
+import {
+  type VzletGradeKey,
+  type VzletQuestion,
+  type VzletStage,
+  vzletAnimatedFilmList,
+  vzletPrepData,
+  vzletSoundtrackFilmList,
+} from "@/data/vzlet-prep";
 import styles from "./page.module.css";
 
 type StageFilter = "all" | VzletStage;
 type SavedProgress = Record<string, { best: number; attempts: number }>;
-const stageLabel: Record<VzletStage, string> = { school: "Школьный этап", municipal: "Муниципальный этап" };
+
+const gradeOrder: VzletGradeKey[] = ["7-8", "9-10", "11"];
+const stageLabel: Record<VzletStage, string> = {
+  school: "Школьный этап",
+  municipal: "Муниципальный этап",
+};
 
 function gradeGroupFromProfile(grade: number): VzletGradeKey {
   if (grade >= 11) return "11";
@@ -39,13 +69,23 @@ export default function VzletPrepClient() {
       if (profile?.grade) setGradeKey(gradeGroupFromProfile(Number(profile.grade)));
       setProgress(JSON.parse(localStorage.getItem("vzletPrepProgress2026") || "{}"));
     } catch {
-      // Safe defaults are enough if storage cannot be read.
+      // Keep safe defaults if storage is unavailable.
     }
   }, []);
 
   const group = vzletPrepData[gradeKey];
-  const cards = useMemo(() => group.cards.filter((item) => stage === "all" || item.stage === stage), [group, stage]);
-  const bank = useMemo(() => group.questions.filter((item) => stage === "all" || item.stage === stage), [group, stage]);
+  const requirements = useMemo(
+    () => group.requirements.filter((item) => stage === "all" || item.stage === stage),
+    [group, stage],
+  );
+  const cards = useMemo(
+    () => group.cards.filter((item) => stage === "all" || item.stage === stage),
+    [group, stage],
+  );
+  const bank = useMemo(
+    () => group.questions.filter((item) => stage === "all" || item.stage === stage),
+    [group, stage],
+  );
   const card = cards[cardIndex];
   const activeQuestion = quiz[questionIndex];
   const progressKey = `${gradeKey}:${stage}`;
@@ -92,7 +132,10 @@ export default function VzletPrepClient() {
       const percentage = Math.round((score / quiz.length) * 100);
       const nextProgress: SavedProgress = {
         ...progress,
-        [progressKey]: { best: Math.max(saved?.best || 0, percentage), attempts: (saved?.attempts || 0) + 1 },
+        [progressKey]: {
+          best: Math.max(saved?.best || 0, percentage),
+          attempts: (saved?.attempts || 0) + 1,
+        },
       };
       setProgress(nextProgress);
       localStorage.setItem("vzletPrepProgress2026", JSON.stringify(nextProgress));
@@ -109,74 +152,125 @@ export default function VzletPrepClient() {
       <div className={styles.shell}>
         <div className={styles.topline}>
           <Link href="/dashboard" className={styles.back}><ArrowLeft size={18} /> В кабинет</Link>
-          <span className={styles.liveBadge}><Sparkles size={15} /> ВЗЛЁТ PREP · 2026</span>
+          <span className={styles.liveBadge}><Sparkles size={15} /> VZLET PREP · 2026</span>
         </div>
 
         <section className={styles.hero}>
-          <div>
-            <span className={styles.eyebrow}>ОЛИМПИАДНЫЙ ИНТЕНСИВ</span>
-            <h1>Подготовка по темам «Взлёта»</h1>
-            <p>Карточки, олимпиадные ловушки, фильмы, страноведение и быстрые квизы по темам школьного и муниципального этапов.</p>
+          <div className={styles.heroCopy}>
+            <span className={styles.eyebrow}>ОЛИМПИАДА · БЕЗ ХАОСА</span>
+            <h1>Темы «Взлёта» — в понятной системе подготовки</h1>
+            <p>Сначала запоминаем ключевые выражения и факты, затем узнаём их в контексте и закрепляем в коротком олимпиадном спринте.</p>
             <div className={styles.heroStats}>
-              <span><BookOpenCheck /> {group.requirements.length} блоков</span>
-              <span><Brain /> {group.cards.length} карточек</span>
-              <span><Zap /> {group.questions.length} заданий</span>
+              <span><BookOpenCheck /> {requirements.length} тем</span>
+              <span><Brain /> {cards.length} карточек</span>
+              <span><Zap /> {bank.length} заданий</span>
             </div>
           </div>
-          <div className={styles.heroMark}><Trophy /></div>
+          <div className={styles.heroVisual}>
+            <div className={styles.heroGlowOne} />
+            <div className={styles.heroGlowTwo} />
+            <small>ТВОЙ МАРШРУТ</small>
+            <strong>{group.label}</strong>
+            <p>{group.subtitle}</p>
+            <div className={styles.miniRoute}>
+              <span><Brain /> Idioms</span>
+              <span><Map /> Country studies</span>
+              <span><Target /> Sprint</span>
+            </div>
+          </div>
         </section>
 
-        <section className={styles.filters} aria-label="Выбор класса и этапа">
-          <div><small>КЛАСС</small><div className={styles.switchRow}>
-            {(Object.keys(vzletPrepData) as VzletGradeKey[]).map((key) => <button key={key} className={gradeKey === key ? styles.activeSwitch : ""} onClick={() => setGradeKey(key)}>{vzletPrepData[key].label}</button>)}
-          </div></div>
-          <div><small>ЭТАП</small><div className={styles.switchRow}>
-            {(["all", "school", "municipal"] as StageFilter[]).map((key) => <button key={key} className={stage === key ? styles.activeSwitch : ""} onClick={() => setStage(key)}>{key === "all" ? "Все" : stageLabel[key]}</button>)}
-          </div></div>
+        <section className={styles.controls} aria-label="Выбор класса и этапа">
+          <div className={styles.controlBlock}>
+            <small>ВЫБЕРИ КЛАСС</small>
+            <div className={styles.gradeSwitch}>
+              {gradeOrder.map((key) => (
+                <button key={key} className={gradeKey === key ? styles.activeGrade : ""} onClick={() => setGradeKey(key)}>
+                  <b>{vzletPrepData[key].label}</b>
+                  <span>{vzletPrepData[key].subtitle}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.controlBlock}>
+            <small>ЭТАП ПОДГОТОВКИ</small>
+            <div className={styles.stageSwitch}>
+              {(["all", "school", "municipal"] as StageFilter[]).map((key) => (
+                <button key={key} className={stage === key ? styles.activeStage : ""} onClick={() => setStage(key)}>
+                  {key === "all" ? "Все темы" : stageLabel[key]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.focusStrip}>
+          <article className={styles.focusViolet}><Brain /><div><small>01 · ЗАПОМНИ</small><b>Идиомы</b><span>{cards.filter((item) => item.tag !== "USA" && item.tag !== "Great Britain" && item.tag !== "British history" && item.tag !== "Soundtracks").length} карточек</span></div></article>
+          <article className={styles.focusBlue}><Map /><div><small>02 · УЗНАЙ</small><b>Страноведение</b><span>{gradeKey === "7-8" ? "USA + animated films" : gradeKey === "9-10" ? "Great Britain + soundtracks" : "British history + soundtracks"}</span></div></article>
+          <article className={styles.focusCoral}><Target /><div><small>03 · ПРОВЕРЬ</small><b>Olympiad Sprint</b><span>до 10 вопросов за раунд</span></div></article>
         </section>
 
         <section className={styles.section}>
           <div className={styles.sectionHeading}>
-            <div><span>01</span><div><small>ROADMAP</small><h2>Что именно учить</h2></div></div>
-            {saved && <div className={styles.best}><Trophy size={17} /> Лучший квиз: {saved.best}% · попыток {saved.attempts}</div>}
+            <div><span>01</span><div><small>ROADMAP</small><h2>Что нужно знать</h2></div></div>
+            {saved && <div className={styles.best}><Trophy size={17} /> Лучший результат: {saved.best}% · попыток {saved.attempts}</div>}
           </div>
           <div className={styles.requirementGrid}>
-            {group.requirements.filter((item) => stage === "all" || item.stage === stage).map((item) => <article className={styles.requirement} key={`${item.stage}-${item.title}`}>
-              <div className={styles.reqTop}><span className={item.stage === "municipal" ? styles.municipal : styles.school}>{item.stage === "municipal" ? "МУНИЦИПАЛЬНЫЙ" : "ШКОЛЬНЫЙ"}</span><b>{item.area}</b></div>
-              <h3>{item.title}</h3><p>{item.details}</p>
-            </article>)}
+            {requirements.map((item) => (
+              <article className={`${styles.requirement} ${item.area === "Idioms" ? styles.idiomReq : styles.cultureReq}`} key={`${item.stage}-${item.title}`}>
+                <div className={styles.reqTop}>
+                  <span className={item.stage === "municipal" ? styles.municipal : styles.school}>{item.stage === "municipal" ? "МУНИЦИПАЛЬНЫЙ" : "ШКОЛЬНЫЙ"}</span>
+                  <b>{item.area}</b>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.details}</p>
+              </article>
+            ))}
           </div>
         </section>
 
         <section className={styles.studyGrid}>
           <article className={styles.deckPanel}>
-            <div className={styles.panelHeading}><div><small>02 · LEARN</small><h2>Карточки памяти</h2></div><span>{cards.length ? cardIndex + 1 : 0} / {cards.length}</span></div>
+            <div className={styles.panelHeading}>
+              <div><small>02 · MEMORY DECK</small><h2>Карточки для запоминания</h2></div>
+              <span>{cards.length ? cardIndex + 1 : 0} / {cards.length}</span>
+            </div>
             {card ? <>
               <button className={`${styles.flashcard} ${flipped ? styles.flipped : ""}`} onClick={() => setFlipped((value) => !value)}>
-                <span className={styles.cardTag}>{card.tag} · {stageLabel[card.stage]}</span>
+                <div className={styles.cardTop}><span className={styles.cardTag}>{card.tag}</span><em>{stageLabel[card.stage]}</em></div>
                 <strong>{flipped ? card.back : card.front}</strong>
-                <small>{flipped ? "Нажми, чтобы увидеть термин" : "Сначала вспомни значение → нажми"}</small>
+                <small>{flipped ? "Нажми ещё раз, чтобы вернуться к термину" : "Вспомни значение сам → потом открой ответ"}</small>
               </button>
               <div className={styles.cardActions}>
-                <button onClick={() => speak(card.front)}><Volume2 size={18} /> Слушать</button>
+                <button onClick={() => speak(card.front)}><Volume2 size={18} /> Произношение</button>
                 <button onClick={() => { setCardIndex((value) => (value - 1 + cards.length) % cards.length); setFlipped(false); }}><ArrowLeft size={18} /> Назад</button>
-                <button onClick={() => { setCardIndex((value) => (value + 1) % cards.length); setFlipped(false); }}>Дальше <ArrowRight size={18} /></button>
+                <button className={styles.nextCard} onClick={() => { setCardIndex((value) => (value + 1) % cards.length); setFlipped(false); }}>Следующая <ArrowRight size={18} /></button>
               </div>
-            </> : <p>Для этого фильтра пока нет карточек.</p>}
+            </> : <p>Для выбранного фильтра карточек пока нет.</p>}
           </article>
 
           <article className={styles.filmPanel}>
-            <div className={styles.panelHeading}><div><small>FILM RADAR</small><h2>{gradeKey === "7-8" ? "Animated films" : "Film soundtracks"}</h2></div><Film /></div>
-            <p className={styles.muted}>Для 7–8 классов тренируем узнавание фильма по эпизоду; для 9–11 — узнавание саундтрека и композитора.</p>
-            <div className={styles.chips}>{filmList.map((film) => <span key={film}>{film}</span>)}</div>
-            <div className={styles.tip}><Flag size={17} /> Годы в тренировке не спрашиваем: важнее быстро узнать произведение по характерному признаку.</div>
+            <div className={styles.panelHeading}>
+              <div><small>VISUAL MEMORY</small><h2>{gradeKey === "7-8" ? "Animated films" : "Film soundtracks"}</h2></div>
+              <Film />
+            </div>
+            <p className={styles.muted}>{gradeKey === "7-8" ? "Учимся узнавать мультфильм по герою, ситуации и ключевой детали сюжета." : "Связываем фильм, композитора и характер звучания — так саундтреки запоминаются быстрее."}</p>
+            <div className={styles.chips}>{filmList.map((film, index) => <span key={film}><i>{String(index + 1).padStart(2, "0")}</i>{film}</span>)}</div>
+            <div className={styles.tip}><Flag size={17} /> Это авторская тренировка по заявленным темам «Взлёта»: задания не копируют упражнения из пособий.</div>
           </article>
         </section>
 
         <section className={styles.quizPanel}>
-          <div className={styles.sectionHeading}><div><span>03</span><div><small>SPRINT</small><h2>10 вопросов на скорость</h2></div></div><div className={styles.timer}><Clock3 size={17} /> Сначала точность, потом скорость</div></div>
+          <div className={styles.sectionHeading}>
+            <div><span>03</span><div><small>OLYMPIAD SPRINT</small><h2>Проверка без подсказок</h2></div></div>
+            <div className={styles.timer}><Clock3 size={17} /> 10 вопросов · сразу разбираем ошибку</div>
+          </div>
 
-          {!quiz.length && !finished && <div className={styles.quizIntro}><div><Zap /><h3>Olympiad Sprint</h3><p>Система перемешает задания по выбранному классу и этапу.</p></div><button onClick={startQuiz}>Начать квиз <ArrowRight size={18} /></button></div>}
+          {!quiz.length && !finished && <div className={styles.quizIntro}>
+            <div className={styles.quizIntroIcon}><Zap /></div>
+            <div><small>ГОТОВ К СПРИНТУ?</small><h3>Смешанный раунд по выбранным темам</h3><p>Вопросы перемешиваются, а после ответа появляется короткое объяснение.</p></div>
+            <button onClick={startQuiz}>Начать <ArrowRight size={18} /></button>
+          </div>}
 
           {!!quiz.length && !finished && activeQuestion && <div className={styles.questionBox}>
             <div className={styles.questionMeta}><span>{questionIndex + 1} / {quiz.length}</span><b>{activeQuestion.tag}</b><em>{stageLabel[activeQuestion.stage]}</em></div>
@@ -189,17 +283,17 @@ export default function VzletPrepClient() {
               const className = answered ? (isCorrect ? styles.correct : isSelected ? styles.wrong : styles.dimmed) : "";
               return <button key={option} className={className} onClick={() => chooseAnswer(index)} disabled={answered}><span>{String.fromCharCode(65 + index)}</span>{option}{answered && isCorrect && <Check size={18} />}{answered && isSelected && !isCorrect && <X size={18} />}</button>;
             })}</div>
-            {selected !== null && <div className={styles.explanation}><b>{selected === activeQuestion.answer ? "Верно!" : "Разберём ловушку"}</b><p>{activeQuestion.explanation}</p><button onClick={nextQuestion}>{questionIndex + 1 === quiz.length ? "Показать результат" : "Следующий вопрос"} <ArrowRight size={17} /></button></div>}
+            {selected !== null && <div className={styles.explanation}><div><b>{selected === activeQuestion.answer ? "Верно — так держать" : "Вот где была ловушка"}</b><p>{activeQuestion.explanation}</p></div><button onClick={nextQuestion}>{questionIndex + 1 === quiz.length ? "Результат" : "Дальше"} <ArrowRight size={17} /></button></div>}
           </div>}
 
-          {finished && <div className={styles.resultBox}><Trophy /><div><small>РЕЗУЛЬТАТ</small><h3>{score} / {quiz.length} · {quizPercent}%</h3><p>{quizPercent >= 80 ? "Сильный результат. Теперь добей слабые карточки." : quizPercent >= 60 ? "База есть. Пройди карточки и повтори спринт." : "Сначала закрепи карточки, затем повтори спринт."}</p></div><button onClick={startQuiz}><RotateCcw size={18} /> Ещё попытка</button></div>}
+          {finished && <div className={styles.resultBox}><div className={styles.resultIcon}><Trophy /></div><div><small>РАУНД ЗАВЕРШЁН</small><h3>{score} / {quiz.length} · {quizPercent}%</h3><p>{quizPercent >= 80 ? "Отличная готовность. Теперь повтори только сложные карточки." : quizPercent >= 60 ? "Хорошая база. Ещё один цикл карточек заметно поднимет результат." : "Сначала пройди карточки и roadmap, затем повтори спринт."}</p></div><button onClick={startQuiz}><RotateCcw size={18} /> Повторить</button></div>}
         </section>
 
         <section className={styles.strategy}>
-          <div><span>1</span><b>LEARN</b><p>Карточки: термин → значение / факт.</p></div><ArrowRight />
-          <div><span>2</span><b>RECALL</b><p>Закрой ответ и проговори его вслух.</p></div><ArrowRight />
-          <div><span>3</span><b>SPRINT</b><p>10 перемешанных вопросов без подсказок.</p></div><ArrowRight />
-          <div><span>4</span><b>REPEAT</b><p>Повтори ошибки на следующий день.</p></div>
+          <div className={styles.stepViolet}><span>1</span><BookOpen /><b>Изучи</b><p>Посмотри темы и пойми, что именно проверяют.</p></div>
+          <div className={styles.stepBlue}><span>2</span><Brain /><b>Вспомни</b><p>Работай с карточками без подсматривания.</p></div>
+          <div className={styles.stepPink}><span>3</span><Target /><b>Проверь</b><p>Пройди спринт и разбери каждую ошибку.</p></div>
+          <div className={styles.stepCoral}><span>4</span><RotateCcw /><b>Повтори</b><p>Вернись к слабым темам на следующий день.</p></div>
         </section>
       </div>
     </main>
