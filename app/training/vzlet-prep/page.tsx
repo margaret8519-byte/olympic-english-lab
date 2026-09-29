@@ -1,5 +1,5 @@
-import SimpleVzletPrep from "./simple-client";
+import PremiumVzletPrep from "./premium-client";
 
 export default function VzletPrepPage() {
-  return <SimpleVzletPrep />;
+  return <PremiumVzletPrep />;
 }
