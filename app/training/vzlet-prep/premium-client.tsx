@@ -25,6 +25,7 @@ import {
   vzletPrepData,
 } from "@/data/vzlet-prep";
 import styles from "./premium.module.css";
+import StudyArt from "./study-art";
 
 type StageFilter = "all" | VzletStage;
 type Mode = "idioms" | "film" | "culture" | "mixed" | "mistakes";
@@ -262,38 +263,41 @@ export default function PremiumVzletPrep() {
         <section className={styles.hero}>
           <div>
             <small>SMART PREP · 2026</small>
-            <h1>Олимпиадная подготовка к «Взлёту»</h1>
-            <p>Не угадывание по картинке, а работа с признаками: контекст, логика, исключение distractors и точные факты.</p>
+            <h1>Олимпиадная<br />подготовка к <span>«Взлёту»</span></h1>
+            <p>Твой следующий уровень английского: контекст, логика, точные факты и уверенность в каждом ответе.</p>
           </div>
+          <StudyArt kind="hero" className={styles.heroArt} />
           <div className={styles.heroPanel}>
-            <span>YOUR TRACK</span>
+            <Trophy className={styles.trackTrophy} />
+            <span>ТВОЙ ТРЕК</span>
             <b>{group.label}</b>
             <p>{group.subtitle}</p>
-            <div><i /> evidence-based practice</div>
+            <div><i /> Олимпиадная подготовка</div>
           </div>
         </section>
 
         <section className={styles.controls}>
           <div className={styles.controlBlock}>
-            <small>01 · CLASS</small>
-            <div>{gradeOrder.map((key) => <button key={key} className={gradeKey === key ? styles.active : ""} onClick={() => setGradeKey(key)}>{vzletPrepData[key].label}</button>)}</div>
+            <small>01 · КЛАСС</small>
+            <div>{gradeOrder.map((key) => <button key={key} aria-pressed={gradeKey === key} className={gradeKey === key ? styles.active : ""} onClick={() => setGradeKey(key)}>{vzletPrepData[key].label}</button>)}</div>
           </div>
           <div className={styles.controlBlock}>
-            <small>02 · STAGE</small>
-            <div>{(["all", "school", "municipal"] as StageFilter[]).map((key) => <button key={key} className={stage === key ? styles.active : ""} onClick={() => setStage(key)}>{stageTitle[key]}</button>)}</div>
+            <small>02 · ЭТАП ПОДГОТОВКИ</small>
+            <div>{(["all", "school", "municipal"] as StageFilter[]).map((key) => <button key={key} aria-pressed={stage === key} className={stage === key ? styles.active : ""} onClick={() => setStage(key)}>{stageTitle[key]}</button>)}</div>
           </div>
         </section>
 
         <section className={styles.modeSection}>
-          <div className={styles.sectionTitle}><div><small>03 · TRAINING MODE</small><h2>Выбери, что прокачать</h2></div><p>Каждый режим тренирует отдельный тип олимпиадного мышления.</p></div>
+          <div className={styles.sectionTitle}><div><small>03 · РЕЖИМЫ ТРЕНИРОВКИ</small><h2>Выбери, что прокачать</h2></div><p>Каждый режим тренирует отдельный тип олимпиадного мышления.</p></div>
           <div className={styles.modeGrid}>
             {availableModes.map((item, order) => {
               const Icon = item === "idioms" ? Brain : item === "film" ? Film : item === "culture" ? Map : item === "mistakes" ? RotateCcw : Target;
-              return <button key={item} className={`${styles.modeCard} ${mode === item ? styles.modeActive : ""}`} onClick={() => start(item)}>
-                <div className={styles.modeTop}><span>0{order + 1}</span><Icon /></div>
+              return <button key={item} aria-pressed={mode === item} data-mode={item} className={`${styles.modeCard} ${mode === item ? styles.modeActive : ""}`} onClick={() => start(item)}>
+                <div className={styles.modeTop}><Icon /><span>0{order + 1}</span></div>
+                <StudyArt kind={item} className={styles.modeArt} />
                 <b>{modeName(item, gradeKey)}</b>
                 <p>{modeSubtitle(item, gradeKey, mistakes.length)}</p>
-                <em>Start round <ArrowRight size={14} /></em>
+                <em><ArrowRight size={20} /><span>Начать раунд</span></em>
               </button>;
             })}
           </div>
@@ -302,7 +306,7 @@ export default function PremiumVzletPrep() {
         <section className={styles.workspace}>
           <div className={styles.quizPanel}>
             <div className={styles.quizHeader}>
-              <div><small>ACTIVE ROUND</small><h2>{modeName(mode, gradeKey)}</h2></div>
+              <div><small>ACTIVE ROUND · АКТИВНЫЙ РАУНД</small><h2>{modeName(mode, gradeKey)}</h2></div>
               {!!quiz.length && !finished && <span>{String(index + 1).padStart(2, "0")} / {String(quiz.length).padStart(2, "0")}</span>}
             </div>
             {!!quiz.length && !finished && <div className={styles.progress}><span style={{ width: `${progress}%` }} /></div>}
@@ -343,15 +347,15 @@ export default function PremiumVzletPrep() {
           </div>
 
           <aside className={styles.memoryPanel}>
-            <div className={styles.memoryHead}><div><small>MEMORY LAB</small><h2>Recall deck</h2></div><span>{studyCards.length ? cardIndex % studyCards.length + 1 : 0}/{studyCards.length}</span></div>
+            <div className={styles.memoryHead}><div><small>MEMORY LAB</small><h2><Brain size={24} /> Recall Deck</h2></div><span>{studyCards.length ? cardIndex % studyCards.length + 1 : 0}/{studyCards.length}</span></div>
             {card && cardView ? <>
-              <button className={`${styles.flash} ${showAnswer ? styles.flashBack : ""}`} onClick={() => setShowAnswer((v) => !v)}>
-                <div><small>{card.tag}</small><em>{showAnswer ? "BACK" : "FRONT"}</em></div>
+              <button aria-label={showAnswer ? "Скрыть ответ карточки" : "Показать ответ карточки"} className={`${styles.flash} ${showAnswer ? styles.flashBack : ""}`} onClick={() => setShowAnswer((v) => !v)}>
+                <div><small>{card.tag}</small><em>{showAnswer ? "ОТВЕТ" : "ВОПРОС"}</em></div>
                 <b>{showAnswer ? cardView.answer : cardView.front}</b>
                 {showAnswer && cardView.detail && <p>{cardView.detail}</p>}
-                <span>{showAnswer ? "tap to return" : "recall first → then reveal"}</span>
+                <span>{showAnswer ? "Нажми, чтобы вернуться к вопросу" : "Вспомни ответ → нажми, чтобы проверить"}</span>
               </button>
-              <div className={styles.memoryActions}><button onClick={() => { const u = new SpeechSynthesisUtterance(cardView.front); u.lang = "en-GB"; window.speechSynthesis?.speak(u); }}><Volume2 size={15} /> Listen</button><button onClick={() => { setCardIndex((v) => v + 1); setShowAnswer(false); }}>Next <ArrowRight size={15} /></button></div>
+              <div className={styles.memoryActions}><button onClick={() => { const u = new SpeechSynthesisUtterance(cardView.front); u.lang = "en-GB"; window.speechSynthesis?.speak(u); }}><Volume2 size={15} /> Прослушать</button><button onClick={() => { setCardIndex((v) => v + 1); setShowAnswer(false); }}>Далее <ArrowRight size={15} /></button></div>
             </> : <div className={styles.memoryEmpty}>No recall cards for this mode yet.</div>}
           </aside>
         </section>
