@@ -1,0 +1,34 @@
+name: Check per-student rotation
+
+on:
+  pull_request:
+    branches: [github-pages-static-test]
+    paths:
+      - 'lib/full-training-storage.ts'
+      - 'lib/full-olympiad.ts'
+      - 'components/training/FullOlympiadTraining.tsx'
+      - 'tests/full-training-rotation.test.ts'
+      - '.github/workflows/per-student-rotation-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-training:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAGES: "true"
+      NEXT_PUBLIC_BASE_PATH: /olympic-english-lab
+      NEXT_PUBLIC_SUPABASE_URL: https://mrvanjghovfpedcdqzzb.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_WiABeNwFKOAVrPBBIwV7kg_wtTnWfWK
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --experimental-strip-types --test tests/full-training-rotation.test.ts
+      - run: npx eslint lib/full-training-storage.ts lib/full-olympiad.ts components/training/FullOlympiadTraining.tsx tests/full-training-rotation.test.ts
+      - run: npm run build
+      - run: test -f out/index.html
