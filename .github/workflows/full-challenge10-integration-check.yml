@@ -1,4 +1,4 @@
-name: Grade 10-11 Full Training Integration
+name: Grade 9-11 Full Training Integration
 on:
   pull_request:
     branches:
@@ -14,6 +14,7 @@ on:
       - 'app/guide/page.tsx'
       - 'data/challenge-10-mixed-bank.ts'
       - 'lib/full-olympiad.ts'
+      - 'tests/grade9-mixed-rotation.test.ts'
       - 'tests/grade10-mixed-rotation.test.ts'
       - 'tests/grade11-mixed-rotation.test.ts'
       - 'tests/full-challenge10-integration.test.ts'
@@ -35,8 +36,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node --experimental-strip-types --test tests/challenge-10-preview.test.ts tests/full-challenge10-integration.test.ts tests/grade10-mixed-rotation.test.ts tests/grade11-mixed-rotation.test.ts
-      - run: npx eslint app/dashboard/page.tsx app/training/full-olympiad/page.tsx app/training/new-olympiad/page.tsx app/training/official-archive/page.tsx app/training/challenge-10-preview/page.tsx components/Sidebar.tsx components/training/GradeOfficialSection.tsx app/guide/page.tsx lib/full-olympiad.ts data/challenge-10-mixed-bank.ts tests/full-challenge10-integration.test.ts tests/grade10-mixed-rotation.test.ts tests/grade11-mixed-rotation.test.ts
+      - run: node --experimental-strip-types --test tests/challenge-10-preview.test.ts tests/full-challenge10-integration.test.ts tests/grade9-mixed-rotation.test.ts tests/grade10-mixed-rotation.test.ts tests/grade11-mixed-rotation.test.ts
+      - run: npx eslint app/dashboard/page.tsx app/training/full-olympiad/page.tsx app/training/new-olympiad/page.tsx app/training/official-archive/page.tsx app/training/challenge-10-preview/page.tsx components/Sidebar.tsx components/training/GradeOfficialSection.tsx app/guide/page.tsx lib/full-olympiad.ts data/challenge-10-mixed-bank.ts tests/full-challenge10-integration.test.ts tests/grade9-mixed-rotation.test.ts tests/grade10-mixed-rotation.test.ts tests/grade11-mixed-rotation.test.ts
       - run: npm run build
       - run: test -f out/training/full-olympiad/index.html
       - run: test -f out/training/new-olympiad/index.html
