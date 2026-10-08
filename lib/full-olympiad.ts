@@ -213,16 +213,22 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
       const officialBank=officialObjective.filter(q=>q.source==="official-vsosh-vzlet"&&q.section===section);
       const originalBank=officialObjective.filter(q=>q.source==="original-olympic-english-lab"&&q.section===section);
       const selectable=(q:FullQuestion)=>!q.needsReview&&q.acceptedAnswers.length>0;
-      const globallyNew=(q:FullQuestion)=>selectable(q)&&!history[q.id]?.seen&&!sharedHistory[q.id]?.seen;
-      const personallyNew=(q:FullQuestion)=>selectable(q)&&!history[q.id]?.seen;
-      const officialGlobal=officialBank.some(globallyNew),originalGlobal=originalBank.some(globallyNew);
-      const officialLocal=officialBank.some(personallyNew),originalLocal=originalBank.some(personallyNew);
-      // Fresh tasks take priority: never pad an attempt with repeats from an exhausted source.
-      const useGlobal=officialGlobal||originalGlobal,useLocal=officialLocal||originalLocal;
-      const allowOfficial=useGlobal?officialGlobal:useLocal?officialLocal:true;
-      const allowOriginal=useGlobal?originalGlobal:useLocal?originalLocal:true;
-      const official=allowOfficial?selectFullQuestions(officialBank,section,history,lastIds,8,rng,sharedHistory,true):[];
-      const original=allowOriginal?selectFullQuestions(originalBank,section,history,lastIds,8,rng,sharedHistory,true):[];
+      // Deduplicate across official and author IDs too; both may contain
+      // identical questions with different labels.
+      const contentKey=(q:FullQuestion)=>q.text?.trim()?[q.section,q.text,q.passage||""].join("|").normalize("NFKC").toLocaleLowerCase("en").replace(/\s+/g," ").trim():q.id;
+      const seenText=new Set(officialObjective.filter(q=>history[q.id]?.seen).map(contentKey));
+      const effectiveHistory:FullHistory={...history};
+      for(const q of [...officialBank,...originalBank])
+        if(seenText.has(contentKey(q))&&!effectiveHistory[q.id]?.seen)effectiveHistory[q.id]={seen:1,incorrect:0};
+      const personallyNew=(q:FullQuestion)=>!q.needsReview&&q.acceptedAnswers.length>0&&!effectiveHistory[q.id]?.seen;
+      const officialFresh=officialBank.some(personallyNew),originalFresh=originalBank.some(personallyNew);
+      // Personal freshness wins over the browser-wide queue. Previously a
+      // globally fresh *but personally seen* source could force repeats while
+      // the pupil still had unseen questions from the other source.
+      const allowOfficial=officialFresh||!originalFresh;
+      const allowOriginal=originalFresh||!officialFresh;
+      const official=allowOfficial?selectFullQuestions(officialBank,section,effectiveHistory,lastIds,8,rng,sharedHistory,true):[];
+      const original=allowOriginal?selectFullQuestions(originalBank,section,effectiveHistory,lastIds,8,rng,sharedHistory,true):[];
       ids[section]=[...official,...original].map(q=>q.id);
     }else ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng,sharedHistory).map(q=>q.id);
   }
