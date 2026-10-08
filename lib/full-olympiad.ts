@@ -5,6 +5,7 @@ import {grade782022Sets} from "../data/questions/grade-7-8/2022/index.ts";
 import {grade782025Sets} from "../data/questions/grade-7-8/2025/index.ts";
 import {grade9OriginalQuestionBank} from "../data/questions/grade-9/original/index.ts";
 import {grade9Official2024} from "../data/questions/grade-9/official/2024/index.ts";
+import {grade9Reading2023Verified,grade9UseOfEnglish2023Verified} from "../data/questions/grade-9/official/2023/verified.ts";
 import {grade9Writing2022} from "../data/questions/grade-9/official/2022/index.ts";
 import {grade9Writing2023} from "../data/questions/grade-9/official/2023/index.ts";
 import {grade10WritingSets,grade11WritingSets,objectiveBankForSeniorGrade} from "../data/questions/grade-10-11/index.ts";
@@ -87,9 +88,9 @@ function generatedFullBankForGrade(grade:number){
 
 export function fullBankForGrade(grade:number,variant:FullVariant="official"):{objective:FullQuestion[];listeningGroups:ListeningGroup[];writing:FullQuestion;writings:FullQuestion[]}{
   if(variant==="generated")return generatedFullBankForGrade(grade);
-  if(variant==="mixed"&&(grade===10||grade===11)){
+  if(variant==="mixed"&&(grade===9||grade===10||grade===11)){
     const official=fullBankForGrade(grade,"official"),sets=generatedCompleteSetsForGrade(grade);
-    // Only the approved Grade 10 Challenge 01 exists; never give Grade 10 papers to Grade 11.
+    // Only Grade 10 has the separately approved Challenge 01; never share it across grades.
     const approvedObjective=grade===10?approved10Questions.filter(q=>q.section==="reading"||q.section==="use-of-english"):[];
     const approvedAudio=grade===10?approved10Listening:[];
     const approvedWritings=grade===10?[approved10Writing as FullQuestion]:[];
@@ -107,7 +108,7 @@ export function fullBankForGrade(grade:number,variant:FullVariant="official"):{o
     ? [...grade9OriginalQuestionBank.map(q=>normalizeAdaptive(q,9)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade9Official2024[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade9Official2024.listening.id:q.groupId})))]
     : [...originalQuestionBank.map(q=>normalizeAdaptive(q,grade)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade782022Sets[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade782022Sets.listening.id:q.groupId})))];
   const currentObjective=shared2025?[...keyed(shared2025.reading.items),...keyed(shared2025["use-of-english"].items)] as FullQuestion[]:[];
-  const extra=grade===10?[grade10Reading2022Verified,grade10UseOfEnglish2022Verified,grade10Reading2023Verified,grade10UseOfEnglish2023Verified].flatMap(set=>keyed(set.items)) as FullQuestion[]:grade===11?[grade11Reading2022Verified,grade11UseOfEnglish2022Verified].flatMap(set=>keyed(set.items)) as FullQuestion[]:[];
+  const extra=grade===9?[grade9Reading2023Verified,grade9UseOfEnglish2023Verified].flatMap(set=>keyed(set.items)) as FullQuestion[]:grade===10?[grade10Reading2022Verified,grade10UseOfEnglish2022Verified,grade10Reading2023Verified,grade10UseOfEnglish2023Verified].flatMap(set=>keyed(set.items)) as FullQuestion[]:grade===11?[grade11Reading2022Verified,grade11UseOfEnglish2022Verified].flatMap(set=>keyed(set.items)) as FullQuestion[]:[];
   const objective=[...baseObjective,...currentObjective,...extra];
   const writingSets=grade===10?[grade10Writing2025,...grade10WritingSets,...originalWritingSets(10)]:grade===11?[grade11Writing2025,...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2025,grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade78Writing2025,grade782022Sets.writing];
   const writings=writingSets.flatMap(set=>set.items) as FullQuestion[];
