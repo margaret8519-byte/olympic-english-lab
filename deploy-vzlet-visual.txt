@@ -1,5 +1,6 @@
-Deploy Grade 10 Challenge 01 dashboard entry — 2026-10-08
-Source: github-pages-static-test @ 162e90e2ab55c65f0cced975055ce3cad57a28db
-PR: #29
-Route: /training/challenge-10-preview/
-Legacy training modes remain unchanged.
+Deploy integrated Grade 10 full training · 2026-10-08
+Source: github-pages-static-test @ 8dd191db8018433c5543192e7401222556072f47
+PR: #30
+Main route: /training/full-olympiad/
+Official historical archive: /training/official-archive/
+No separate Challenge 01 card. Grades 7-9, 11 unchanged.
