@@ -1,5 +1,5 @@
-Deploy Grade 11 complete mixed Olympiad training — 2026-10-08
-Source: github-pages-static-test @ 69e660ebfeba54651772810e122d0759b1f574d4
-PR: #34
-Grade 11 full route: /training/full-olympiad/ · authentic 2022/2024/2025 archive plus pre-authored 2026 sets. Rotation avoids exhausting official bank while author questions remain fresh. Resume/new controls and unified full sidebar.
-Grade 10 unchanged. Grades 7-9 unchanged. Static bank (no live AI generation).
+Deploy Grade 9 unified mixed Olympiad training — 2026-10-08
+Source: github-pages-static-test @ eb219991fdd484c019003ed0693f61ef0012b3e3
+PR: #35
+Grade 9 main full training /training/full-olympiad/ now uses verified 2023-2025 official tasks with original authored 2026 sets and first-unseen rotation. Saved sessions resume/new controls and unified sidebar; standalone practice remains separate.
+Grades 10-11 retain mixed mode; Grades 7-8 unchanged. No live AI generation, bank is finite.
