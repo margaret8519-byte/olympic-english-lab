@@ -85,7 +85,7 @@ function generatedFullBankForGrade(grade:number){
   return{objective,listeningGroups,writing:writings[0],writings};
 }
 
-export function fullBankForGrade(grade:number,variant:FullVariant="official"){
+export function fullBankForGrade(grade:number,variant:FullVariant="official"):{objective:FullQuestion[];listeningGroups:ListeningGroup[];writing:FullQuestion|undefined;writings:FullQuestion[]}{
   if(variant==="generated")return generatedFullBankForGrade(grade);
   if(variant==="mixed"&&grade===10){
     const official=fullBankForGrade(10,"official"),sets=generatedCompleteSetsForGrade(10);
