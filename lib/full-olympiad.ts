@@ -8,6 +8,9 @@ import {grade9Official2024} from "../data/questions/grade-9/official/2024/index.
 import {grade9Writing2022} from "../data/questions/grade-9/official/2022/index.ts";
 import {grade9Writing2023} from "../data/questions/grade-9/official/2023/index.ts";
 import {grade10WritingSets,grade11WritingSets,objectiveBankForSeniorGrade} from "../data/questions/grade-10-11/index.ts";
+import {grade10Reading2022Verified} from "../data/questions/grade-10-11/official-2022-reading.ts";
+import {grade10UseOfEnglish2022Verified} from "../data/questions/grade-10-11/official-2022.ts";
+import {grade10Reading2023Verified,grade10UseOfEnglish2023Verified} from "../data/questions/grade-10-11/official-2023-grade10.ts";
 import {seniorOriginalObjective} from "../data/questions/grade-10-11/original.ts";
 import {official2025ForGrade} from "../data/questions/grade-9-10/official-2025.ts";
 import {grade11Official2025} from "../data/questions/grade-11/official-2025.ts";
@@ -90,7 +93,8 @@ export function fullBankForGrade(grade:number,variant:FullVariant="official"){
     ? [...grade9OriginalQuestionBank.map(q=>normalizeAdaptive(q,9)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade9Official2024[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade9Official2024.listening.id:q.groupId})))]
     : [...originalQuestionBank.map(q=>normalizeAdaptive(q,grade)),...FULL_SECTION_ORDER.slice(0,3).flatMap(section=>keyed(grade782022Sets[section].items).map(q=>({...q,groupId:section==="listening"&&!q.groupId?grade782022Sets.listening.id:q.groupId})))];
   const currentObjective=shared2025?[...keyed(shared2025.reading.items),...keyed(shared2025["use-of-english"].items)] as FullQuestion[]:[];
-  const objective=[...baseObjective,...currentObjective];
+  const extra=grade===10?[grade10Reading2022Verified,grade10UseOfEnglish2022Verified,grade10Reading2023Verified,grade10UseOfEnglish2023Verified].flatMap(set=>keyed(set.items)) as FullQuestion[]:[];
+  const objective=[...baseObjective,...currentObjective,...extra];
   const writingSets=grade===10?[grade10Writing2025,...grade10WritingSets,...originalWritingSets(10)]:grade===11?[grade11Writing2025,...grade11WritingSets,...originalWritingSets(11)]:grade===9?[grade9Writing2025,grade9Writing2022,grade9Writing2023,grade9Official2024.writing,...originalWritingSets(9)]:[grade78Writing2025,grade782022Sets.writing];
   const writings=writingSets.flatMap(set=>set.items) as FullQuestion[];
   const currentListening=shared2025?listeningGroupsFromSets([shared2025.listening],grade):[];
@@ -129,7 +133,7 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
   const listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
   for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng).map(q=>q.id);
-  const last=new Set(lastIds),writing=[...officialWritings].sort((a,b)=>{const ar=history[a.id],br=history[b.id],ap=(!ar?0:ar.incorrect?1:2)+(last.has(a.id)?3:0),bp=(!br?0:br.incorrect?1:2)+(last.has(b.id)?3:0);return ap-bp||rng()-.5})[0];
+  const last=new Set(lastIds),writing=officialWritings.map(task=>{const record=history[task.id];return{task,priority:(!record?0:record.incorrect?1:2)+(last.has(task.id)?3:0),tie:rng()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie)[0]?.task;
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
