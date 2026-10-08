@@ -4,7 +4,7 @@ import type {ListeningGroup} from "../lib/standalone-training.ts";
 
 /** Group-preserving adaptation of the teacher-approved original B2+ paper. */
 const original="original-olympic-english-lab" as const;
-const tasks=challenge10.sections.flatMap(s=>s.tasks);
+const tasks:ReadonlyArray<{title:string;body:string;from:number;to:number}>=[...challenge10.sections[0].tasks,...challenge10.sections[1].tasks,...challenge10.sections[2].tasks,...challenge10.sections[3].tasks];
 const taskOf=(n:number)=>tasks.find(t=>t.from<=n&&n<=t.to&&t.from>0);
 const plain=(v:string)=>v.replace(/\*\*/g,"").replace(/\*([^*]+)\*/g,"$1").trim();
 const roman=["I","II","III","IV","V","VI","VII","VIII"];
