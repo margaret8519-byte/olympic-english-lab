@@ -61,7 +61,7 @@ test("Grade 11 dashboard, menu and student guide display the same unified full r
  const gate=source("components/training/GradeOfficialSection.tsx");
  assert.match(dashboard,/\[7,8,9,10,11\]\.includes\(grade\)/);
  assert.match(dashboard,/7,8,9,10,11/);
- assert.match(sidebar,/grade===11/);
+ assert.match(sidebar,/\[7,8,9,10,11\]\.includes\(grade\)/);
  assert.match(guide,/7–11 классов/);
  assert.match(gate,/grade===11/);
 });
@@ -74,8 +74,8 @@ test("Grade 9 uses one full-training entry, separate legacy practice and isolate
  const guide=source("app/guide/page.tsx");
  assert.match(route,/\[7,8,9,10,11\]/);
  assert.match(dashboard,/\[7,8,9,10,11\]\.includes\(grade\)/);
- assert.match(sidebar,/grade===9/);
- assert.match(gate,/grade===9/);
+ assert.match(sidebar,/\[7,8,9,10,11\]\.includes\(grade\)/);
+ assert.match(gate,/\[7,8,9,10,11\]\.includes\(grade\)/);
  assert.match(guide,/7–11/);
 });
 
