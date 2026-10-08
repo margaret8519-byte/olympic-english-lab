@@ -21,13 +21,14 @@ import {generatedWritingSetsForGrade} from "../data/questions/generated-writing-
 import {generatedComplete78,type GeneratedCompleteSet} from "../data/questions/generated-complete-78-2026.ts";
 import {generatedComplete910ForGrade} from "../data/questions/generated-complete-910-2026.ts";
 import {generatedComplete11} from "../data/questions/generated-complete-11-2026.ts";
+import {approved10Questions,approved10Listening,approved10Writing} from "../data/challenge-10-mixed-bank.ts";
 import {listeningGroupsFromSets,seededRandom,selectListeningGroup,type ListeningGroup} from "./standalone-training.ts";
 import {validatedListeningGroupsForGrade} from "./listening-registry.ts";
 
 export const FULL_SECTION_ORDER=["listening","reading","use-of-english","writing"] as const;
 export type FullSection=typeof FULL_SECTION_ORDER[number];
 export type FullQuestion=QuestionBankItem&{options:string[]};
-export type FullVariant="official"|"generated";
+export type FullVariant="official"|"generated"|"mixed";
 export type FullHistory=Record<string,{seen:number;incorrect:number}>;
 export type FullSession={version:1;id:string;grade:number;variant?:FullVariant;startedAt:string;sectionIndex:number;questionIds:Record<Exclude<FullSection,"writing">,string[]>;listeningGroupId?:string;writingTaskId?:string;answers:Record<string,string>;writingText:string;completedAt?:string;writingStatus?:"pending"|"reviewed"|"local";writingReview?:{score:number;maxScore:number;comment?:string|null}};
 export const FULL_ACTIVE_KEY="olympic-full-olympiad-active-v1";
@@ -84,8 +85,16 @@ function generatedFullBankForGrade(grade:number){
   return{objective,listeningGroups,writing:writings[0],writings};
 }
 
-export function fullBankForGrade(grade:number,variant:FullVariant="official"){
+export function fullBankForGrade(grade:number,variant:FullVariant="official"):{objective:FullQuestion[];listeningGroups:ListeningGroup[];writing:FullQuestion;writings:FullQuestion[]}{
   if(variant==="generated")return generatedFullBankForGrade(grade);
+  if(variant==="mixed"&&grade===10){
+    const official=fullBankForGrade(10,"official"),sets=generatedCompleteSetsForGrade(10);
+    const originalObjective=[...sets.flatMap(set=>[...set.reading.items,...set.useOfEnglish.items]),...approved10Questions.filter(q=>q.section==="reading"||q.section==="use-of-english")].map(mixedAuthorOptions) as FullQuestion[];
+    const originalListening=listeningGroupsFromSets(sets.map(set=>set.listening),10);
+    const originalWriting=sets.flatMap(set=>set.writing.items) as FullQuestion[];
+    const writings=[...official.writings,...originalWriting,approved10Writing as FullQuestion];
+    return{objective:[...official.objective,...originalObjective],listeningGroups:[...official.listeningGroups,...originalListening,...approved10Listening],writing:writings[0],writings};
+  }
   const shared2025=grade===7||grade===8?grade782025Sets:grade===9||grade===10?official2025ForGrade(grade):grade===11?grade11Official2025:null;
   const baseObjective:FullQuestion[]=grade===10||grade===11
     ? objectiveBankForSeniorGrade(grade).map(q=>({...q,groupId:q.section==="listening"&&!q.groupId?`g${grade}-2024-listening-audio`:q.groupId}) as FullQuestion)
@@ -102,6 +111,15 @@ export function fullBankForGrade(grade:number,variant:FullVariant="official"){
   return{objective:objective.filter(question=>question.section!=="listening"),listeningGroups,writing:writings[0],writings};
 }
 
+function mixedAuthorOptions(q:QuestionBankItem):FullQuestion{
+  // Stable option rotation prevents a predictable "A"/"B" key in older author packs.
+  const choices=q.options||[],key=q.acceptedAnswers?.[0]?.trim().toLowerCase();
+  if(choices.length!==4||!choices.every((o,i)=>o.startsWith(String.fromCharCode(65+i)+" "))||!key||!["a","b","c","d"].includes(key))return q as FullQuestion;
+  const offset=[...q.id].reduce((sum,char)=>sum+char.charCodeAt(0),0)%4;
+  const out=Array<string>(4);
+  choices.forEach((option,i)=>{const to=(i+offset)%4;out[to]=String.fromCharCode(65+to)+option.slice(1)});
+  return{...q,options:out,acceptedAnswers:[String.fromCharCode(97+((key.charCodeAt(0)-97+offset)%4))]} as FullQuestion;
+}
 type Unit={id:string;items:FullQuestion[];priority:number;tie:number};
 export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSection,"writing">,history:FullHistory={},lastIds:string[]=[],target=10,random=Math.random,sharedHistory:FullHistory={}){
   const candidates=bank.filter(q=>q.section===section&&!q.needsReview&&q.acceptedAnswers.length);
@@ -142,14 +160,26 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
-  const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
+  const officialObjective=variant==="mixed"?objective:objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=variant==="mixed"?writings:writings.filter(question=>question.source==="official-vsosh-vzlet");
   // Restrict the listening pool to unheard recordings until each available group has been issued.
   const freshListening=listeningGroups.filter(group=>!history[group.id]?.seen);
   const globallyFreshListening=freshListening.filter(group=>!sharedHistory[group.id]?.seen);
-  const listeningPool=globallyFreshListening.length?globallyFreshListening:freshListening.length?freshListening:listeningGroups;
+  let listeningPool=globallyFreshListening.length?globallyFreshListening:freshListening.length?freshListening:listeningGroups;
+  if(variant==="mixed"){
+    const previous=listeningGroups.find(group=>group.id===lastListeningGroupId);
+    const alternate=previous?.source==="official-vsosh-vzlet"?"original-olympic-english-lab":previous?"official-vsosh-vzlet":rng()<.5?"official-vsosh-vzlet":"original-olympic-english-lab";
+    const alternatePool=listeningPool.filter(group=>group.source===alternate);
+    if(alternatePool.length)listeningPool=alternatePool;
+  }
   const listeningGroup=selectListeningGroup(listeningPool,history,freshListening.length?undefined:lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng,sharedHistory).map(q=>q.id);
+  for(const section of ["reading","use-of-english"] as const){
+    if(variant==="mixed"){
+      const official=selectFullQuestions(officialObjective.filter(q=>q.source==="official-vsosh-vzlet"),section,history,lastIds,8,rng,sharedHistory);
+      const original=selectFullQuestions(officialObjective.filter(q=>q.source==="original-olympic-english-lab"),section,history,lastIds,8,rng,sharedHistory);
+      ids[section]=[...official,...original].map(q=>q.id);
+    }else ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng,sharedHistory).map(q=>q.id);
+  }
   const freshWriting=officialWritings.filter(task=>!history[task.id]?.seen);
   const globallyFreshWriting=freshWriting.filter(task=>!sharedHistory[task.id]?.seen);
   const writingPool=globallyFreshWriting.length?globallyFreshWriting:freshWriting.length?freshWriting:officialWritings;

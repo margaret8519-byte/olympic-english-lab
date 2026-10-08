@@ -11,6 +11,9 @@ on:
       - 'app/training/challenge-10-preview/**'
       - 'components/Sidebar.tsx'
       - 'app/guide/page.tsx'
+      - 'data/challenge-10-mixed-bank.ts'
+      - 'lib/full-olympiad.ts'
+      - 'tests/grade10-mixed-rotation.test.ts'
       - 'tests/full-challenge10-integration.test.ts'
       - '.github/workflows/full-challenge10-integration-check.yml'
 permissions:
@@ -30,8 +33,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node --experimental-strip-types --test tests/challenge-10-preview.test.ts tests/full-challenge10-integration.test.ts
-      - run: npx eslint app/dashboard/page.tsx app/training/full-olympiad/page.tsx app/training/new-olympiad/page.tsx app/training/official-archive/page.tsx app/training/challenge-10-preview/page.tsx components/Sidebar.tsx app/guide/page.tsx tests/full-challenge10-integration.test.ts
+      - run: node --experimental-strip-types --test tests/challenge-10-preview.test.ts tests/full-challenge10-integration.test.ts tests/grade10-mixed-rotation.test.ts
+      - run: npx eslint app/dashboard/page.tsx app/training/full-olympiad/page.tsx app/training/new-olympiad/page.tsx app/training/official-archive/page.tsx app/training/challenge-10-preview/page.tsx components/Sidebar.tsx app/guide/page.tsx lib/full-olympiad.ts data/challenge-10-mixed-bank.ts tests/full-challenge10-integration.test.ts tests/grade10-mixed-rotation.test.ts
       - run: npm run build
       - run: test -f out/training/full-olympiad/index.html
       - run: test -f out/training/new-olympiad/index.html
