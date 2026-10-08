@@ -1,32 +1,33 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {beginFullTraining,recordFullIssue,fullProfileKey,fullProfileIssuedKey,fullProfileHistoryKey,fullProfileLastIdsKey,preserveFullProfileSession,FULL_ISSUED_KEY} from '../lib/full-training-storage.ts';
+import {beginFullTraining,recordFullIssue,fullProfileKey,fullProfileIssuedKey,fullProfileHistoryKey,fullProfileLastIdsKey,fullGlobalIssuedKey,fullSessionIds,preserveFullProfileSession,FULL_ISSUED_KEY} from '../lib/full-training-storage.ts';
 import {createFullSession,FULL_ACTIVE_KEY,FULL_HISTORY_KEY,selectFullQuestions,resolveSessionQuestions,fullBankForGrade,type FullQuestion} from '../lib/full-olympiad.ts';
 
-function storage(){const map=new Map<string,string>();return{getItem:(k:string)=>map.get(k)??null,setItem:(k:string,v:string)=>{map.set(k,v)},removeItem:(k:string)=>{map.delete(k)}}}
+function storage(){const map=new Map<string,string>();return{getItem:(k:string)=>map.get(k)??null,setItem:(k:string,v:string)=>{map.set(k,v)},removeItem:(k:string)=>{map.delete(k)},get length(){return map.size},key:(index:number)=>[...map.keys()][index]??null}}
 const anna={firstName:'Анна',lastName:'Иванова',grade:'10',classLetter:'А'};
 const boris={...anna,firstName:'Борис'};
 const jane={firstName:' ДЖЕЙН ',lastName:'СМИТ',grade:'9',classLetter:'Б'};
 
-test('pupils sharing a browser get independent new-question queues',()=>{
+test('new pupils sharing a browser rotate common tasks as well as their personal queues',()=>{
  const store=storage();
  const firstAnna=beginFullTraining(store,10,'official',anna,()=>0.5);
- const secondAnna=beginFullTraining(store,10,'official',anna,()=>0.5);
  const firstBoris=beginFullTraining(store,10,'official',boris,()=>0.5);
+ const secondAnna=beginFullTraining(store,10,'official',anna,()=>0.5);
  assert.notEqual(firstAnna.listeningGroupId,secondAnna.listeningGroupId);
  assert.notEqual(firstAnna.writingTaskId,secondAnna.writingTaskId);
  for(const section of ['reading','use-of-english'] as const){
    assert.ok(firstAnna.questionIds[section].length>0);
    assert.equal(firstAnna.questionIds[section].some(id=>secondAnna.questionIds[section].includes(id)),false);
-   assert.deepEqual(firstBoris.questionIds[section],firstAnna.questionIds[section]);
+   assert.equal(firstBoris.questionIds[section].some(id=>firstAnna.questionIds[section].includes(id)),false);
  }
- assert.equal(firstBoris.listeningGroupId,firstAnna.listeningGroupId);
- assert.equal(firstBoris.writingTaskId,firstAnna.writingTaskId);
+ assert.notEqual(firstBoris.listeningGroupId,firstAnna.listeningGroupId);
+ assert.notEqual(firstBoris.writingTaskId,firstAnna.writingTaskId);
  assert.equal(store.getItem(FULL_ISSUED_KEY),null);
  assert.equal(store.getItem(FULL_HISTORY_KEY),null);
  assert.notEqual(fullProfileIssuedKey(anna),fullProfileIssuedKey(boris));
  assert.ok(store.getItem(fullProfileLastIdsKey(anna)));
  assert.ok(store.getItem(fullProfileLastIdsKey(boris)));
+ assert.ok(store.getItem(fullGlobalIssuedKey(10,'official')));
 });
 
 test('unfinished sessions keep answers and issue is recorded at most once for a pupil',()=>{
@@ -141,4 +142,61 @@ test('grade 10 still includes verified 2022 and 2023 reading and grammar, with w
  }
  const questions=resolveSessionQuestions(round);
  assert.equal(questions.length,Object.values(round.questionIds).flat().length);
+});
+
+test('shared queue delays repeats until the last unseen question block is issued',()=>{
+ const q=(id:string,groupId:string)=>({id,groupId,section:'reading',acceptedAnswers:['a'],needsReview:false,options:['A yes']} as FullQuestion);
+ const bank=[q('a1','a'),q('a2','a'),q('b1','b'),q('b2','b'),q('c1','c')];
+ const shared={a1:{seen:1,incorrect:0},a2:{seen:1,incorrect:0},b1:{seen:1,incorrect:0},b2:{seen:1,incorrect:0}};
+ // A new pupil should receive only the fresh block C, not the previously issued A and B.
+ assert.deepEqual(selectFullQuestions(bank,'reading',{},[],10,()=>0.5,shared).map(q=>q.id),['c1']);
+ // After the shared bank is exhausted, their own unseen blocks become eligible.
+ const fullShared={...shared,c1:{seen:1,incorrect:0}};
+ const personal={a1:{seen:1,incorrect:0},a2:{seen:1,incorrect:0}};
+ assert.deepEqual(new Set(selectFullQuestions(bank,'reading',personal,[],10,()=>0.5,fullShared).map(q=>q.id)),new Set(['b1','b2','c1']));
+});
+
+test('migrate tasks already issued in earlier personal-only release',()=>{
+ const store=storage();
+ const prior=createFullSession(10,{},[],()=>0.5);
+ const history=Object.fromEntries(fullSessionIds(prior).map(id=>[id,{seen:1,incorrect:0}]));
+ store.setItem(fullProfileIssuedKey(anna),JSON.stringify({sessionIds:[prior.id],history}));
+ const next=beginFullTraining(store,10,'official',boris,()=>0.5);
+ assert.notEqual(next.listeningGroupId,prior.listeningGroupId);
+ assert.notEqual(next.writingTaskId,prior.writingTaskId);
+ for(const section of ['reading','use-of-english'] as const){
+   assert.equal(next.questionIds[section].some(id=>prior.questionIds[section].includes(id)),false);
+ }
+ const shared=JSON.parse(store.getItem(fullGlobalIssuedKey(10,'official'))!);
+ assert.ok(shared.history[prior.listeningGroupId!]?.seen);
+});
+
+test('mixed pupil starts across grades never reissue tasks until shared bank is exhausted',()=>{
+ for(const grade of [7,8,9,10,11]){
+   const store=storage(),bank=fullBankForGrade(grade,'official');
+   const seen={listening:new Set<string>(),reading:new Set<string>(),'use-of-english':new Set<string>(),writing:new Set<string>()};
+   const all={
+     listening:new Set(bank.listeningGroups.map(group=>group.id)),
+     reading:new Set(bank.objective.filter(q=>q.section==='reading'&&q.source==='official-vsosh-vzlet'&&!q.needsReview&&q.acceptedAnswers.length).map(q=>q.id)),
+     'use-of-english':new Set(bank.objective.filter(q=>q.section==='use-of-english'&&q.source==='official-vsosh-vzlet'&&!q.needsReview&&q.acceptedAnswers.length).map(q=>q.id)),
+     writing:new Set(bank.writings.filter(q=>q.source==='official-vsosh-vzlet').map(q=>q.id))
+   };
+   const max=Math.max(...Object.values(all).map(s=>s.size))+2;
+   for(let turn=0;turn<max&&turn<45;turn++){
+     const profile={firstName:'Tester'+turn,lastName:'Rotation',grade:String(grade),classLetter:'A'};
+     const round=beginFullTraining(store,grade,'official',profile,()=>0.5);
+     for(const section of ['listening','reading','use-of-english','writing'] as const){
+       const ids=section==='listening'?[round.listeningGroupId]:section==='writing'?[round.writingTaskId]:round.questionIds[section];
+       const globallyFresh=seen[section].size<all[section].size;
+       for(const id of ids){
+         if(!id)continue;
+         if(globallyFresh)assert.equal(seen[section].has(id),false,`grade ${grade} ${section}: cross-profile repeat before exhaustion: ${id}`);
+         seen[section].add(id);
+       }
+     }
+     if((Object.keys(all) as Array<keyof typeof all>).every(section=>seen[section].size>=all[section].size))break;
+   }
+   for(const section of ['listening','reading','use-of-english','writing'] as const)
+     assert.equal(seen[section].size,all[section].size,`grade ${grade} ${section}: not all tasks issued`);
+ }
 });
