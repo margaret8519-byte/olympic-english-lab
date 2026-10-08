@@ -1,4 +1,6 @@
-Deploy clear Grade 10 full-versus-standalone navigation · 2026-10-08
-Source: github-pages-static-test @ 530daeffac42975eb377552dc9ceeccd874ea8a7
-PR: #32
-Students in Grade 10 entering old standalone Reading/Listening/Use of English/Writing see a gate with a prominent link to new mixed full training. Existing standalone practice retained explicitly.
+Deploy full-training resume-or-new selection and simplified sidebar · 2026-10-08
+Source: github-pages-static-test @ dc2763f718d5a2056bc335ee4e4188328b832f58
+PR: #33
+Main full-olympiad training shows one unified section progress; no standalone skill tabs in active full mode.
+Existing unfinished rounds now require choice: resume or start new with confirmation.
+Question rotation compares text as well as IDs for imported duplicates.
