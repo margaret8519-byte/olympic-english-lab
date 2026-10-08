@@ -1,0 +1,38 @@
+name: Grade 10 Full Training Integration
+on:
+  pull_request:
+    branches:
+      - github-pages-static-test
+    paths:
+      - 'app/dashboard/page.tsx'
+      - 'app/training/full-olympiad/**'
+      - 'app/training/new-olympiad/**'
+      - 'app/training/official-archive/**'
+      - 'app/training/challenge-10-preview/**'
+      - 'components/Sidebar.tsx'
+      - 'app/guide/page.tsx'
+      - 'tests/full-challenge10-integration.test.ts'
+      - '.github/workflows/full-challenge10-integration-check.yml'
+permissions:
+  contents: read
+jobs:
+  verify-full-training:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAGES: "true"
+      NEXT_PUBLIC_BASE_PATH: /olympic-english-lab
+      NEXT_PUBLIC_SUPABASE_URL: https://mrvanjghovfpedcdqzzb.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_WiABeNwFKOAVrPBBIwV7kg_wtTnWfWK
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --experimental-strip-types --test tests/challenge-10-preview.test.ts tests/full-challenge10-integration.test.ts
+      - run: npx eslint app/dashboard/page.tsx app/training/full-olympiad/page.tsx app/training/new-olympiad/page.tsx app/training/official-archive/page.tsx app/training/challenge-10-preview/page.tsx components/Sidebar.tsx app/guide/page.tsx tests/full-challenge10-integration.test.ts
+      - run: npm run build
+      - run: test -f out/training/full-olympiad/index.html
+      - run: test -f out/training/new-olympiad/index.html
+      - run: test -f out/training/official-archive/index.html
