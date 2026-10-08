@@ -116,9 +116,12 @@ export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSect
     const priority=locallyFresh?(globallyFresh?0:1):(wrong?2:3);
     return{id,items,priority:priority*10+(locallyFresh?0:Number(exactRepeat)*2),tie:random()};
   }).sort((a,b)=>a.priority-b.priority||a.tie-b.tie);
-  // Do not pad an incomplete fresh round with already-issued questions: finish the bank first.
-  const fresh=units.filter(unit=>unit.items.some(item=>!history[item.id]?.seen));
-  const selected:FullQuestion[]=[];for(const unit of fresh.length?fresh:units){selected.push(...unit.items);if(selected.length>=target)break}return selected;
+  // Do not mix already-issued questions into a round while any globally fresh group remains.
+  // When the shared pool is exhausted, continue with groups still unseen by this pupil.
+  const globallyFresh=units.filter(unit=>unit.priority<10);
+  const locallyFresh=units.filter(unit=>unit.priority<20);
+  const pool=globallyFresh.length?globallyFresh:locallyFresh.length?locallyFresh:units;
+  const selected:FullQuestion[]=[];for(const unit of pool){selected.push(...unit.items);if(selected.length>=target)break}return selected;
 }
 
 const firstFullSectionIndex=(ids:FullSession["questionIds"])=>ids.listening.length?0:1;
