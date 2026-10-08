@@ -1,3 +1,3 @@
-Deploy per-student no-repeat training rotation — 2026-10-08
-Source: github-pages-static-test @ 0c713658deb1cd916e511b9e6c8900b66d89eb34
-PR: #26
+Deploy official shared + personal no-repeat rotation — 2026-10-08
+Source: github-pages-static-test @ c721cd2640ba5a8647c07a68139b9bd57563d314
+PR: #27
