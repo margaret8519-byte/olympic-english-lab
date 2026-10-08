@@ -88,7 +88,7 @@ function generatedFullBankForGrade(grade:number){
 
 export function fullBankForGrade(grade:number,variant:FullVariant="official"):{objective:FullQuestion[];listeningGroups:ListeningGroup[];writing:FullQuestion;writings:FullQuestion[]}{
   if(variant==="generated")return generatedFullBankForGrade(grade);
-  if(variant==="mixed"&&(grade===9||grade===10||grade===11)){
+  if(variant==="mixed"&&isSupportedFullGrade(grade)){
     const official=fullBankForGrade(grade,"official"),sets=generatedCompleteSetsForGrade(grade);
     // Only Grade 10 has the separately approved Challenge 01; never share it across grades.
     const approvedObjective=grade===10?approved10Questions.filter(q=>q.section==="reading"||q.section==="use-of-english"):[];
