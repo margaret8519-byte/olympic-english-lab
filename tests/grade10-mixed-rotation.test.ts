@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {fullBankForGrade,resolveSessionQuestions,resolveFullListeningGroup} from "../lib/full-olympiad.ts";
+import {fullBankForGrade,resolveSessionQuestions,resolveFullListeningGroup,selectFullQuestions,type FullQuestion} from "../lib/full-olympiad.ts";
 import {beginFullTraining,fullProfileKey,fullGlobalIssuedKey} from "../lib/full-training-storage.ts";
 import {approved10Questions,approved10Listening,approved10Writing} from "../data/challenge-10-mixed-bank.ts";
 
@@ -68,5 +68,25 @@ test("different pupils share browser rotation, but resume independently",()=>{
  assert.notEqual(a.listeningGroupId,b.listeningGroupId);
  for(const section of ["reading","use-of-english"] as const){
   assert.ok(!a.questionIds[section].some(id=>b.questionIds[section].includes(id)),section+" shared task too soon");
+ }
+});
+
+test("same reading question imported under different IDs is not mistaken for new material",()=>{
+ const make=(id:string,text:string):FullQuestion=>({id,groupId:id,section:"reading",text,passage:"Same archived passage",acceptedAnswers:["a"],options:["A yes","B no"],needsReview:false} as FullQuestion);
+ const bank=[make("2022-q","Which detail revealed the secret?"),make("2024-q","Which detail revealed the secret?"),make("2025-q","What changed after the investigation?")];
+ const history={"2022-q":{seen:1,incorrect:0}};
+ const selected=selectFullQuestions(bank,"reading",history,[],1,()=>0.5,history);
+ assert.deepEqual(selected.map(q=>q.id),["2025-q"]);
+});
+test("second full attempt really changes the displayed wording, not only the task IDs",()=>{
+ const storage=store(),used=new Set<string>();
+ for(let run=0;run<3;run++){
+  const round=beginFullTraining(storage,10,"mixed",profile,()=>0.5);
+  const selected=resolveSessionQuestions(round).filter(q=>q.section==="reading"||q.section==="use-of-english");
+  for(const q of selected){
+   const fingerprint=[q.section,q.text,q.passage||""].join("|").normalize("NFKC").toLowerCase().replace(/\s+/g," ").trim();
+   assert.equal(used.has(fingerprint),false,"identical displayed question in a new round: "+q.id);
+   used.add(fingerprint);
+  }
  }
 });
