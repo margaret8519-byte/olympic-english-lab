@@ -1,6 +1,5 @@
-Deploy full-training resume-or-new selection and simplified sidebar · 2026-10-08
-Source: github-pages-static-test @ dc2763f718d5a2056bc335ee4e4188328b832f58
-PR: #33
-Main full-olympiad training shows one unified section progress; no standalone skill tabs in active full mode.
-Existing unfinished rounds now require choice: resume or start new with confirmation.
-Question rotation compares text as well as IDs for imported duplicates.
+Deploy Grade 11 complete mixed Olympiad training — 2026-10-08
+Source: github-pages-static-test @ 69e660ebfeba54651772810e122d0759b1f574d4
+PR: #34
+Grade 11 full route: /training/full-olympiad/ · authentic 2022/2024/2025 archive plus pre-authored 2026 sets. Rotation avoids exhausting official bank while author questions remain fresh. Resume/new controls and unified full sidebar.
+Grade 10 unchanged. Grades 7-9 unchanged. Static bank (no live AI generation).
