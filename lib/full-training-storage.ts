@@ -15,8 +15,29 @@ export const fullProfileLastIdsKey=(profile:Profile)=>fullProfileKey(profile)+':
 export const fullGlobalIssuedKey=(grade:number,variant:FullVariant)=>`olympic-full-shared-issued-v3:${grade}:${variant}`;
 export function fullSessionIds(session:FullSession){return [session.listeningGroupId,...Object.values(session.questionIds).flat(),session.writingTaskId].filter((id):id is string=>!!id)}
 function readSharedLedger(store:Store,grade:number,variant:FullVariant):IssueLedger{
+  const sharedKey=fullGlobalIssuedKey(grade,variant);
   const legacy=read<IssueLedger>(store,FULL_ISSUED_KEY,{sessionIds:[],history:{}});
-  return read<IssueLedger>(store,fullGlobalIssuedKey(grade,variant),{sessionIds:[],history:legacy.history||{}});
+  if(store.getItem(sharedKey))return read<IssueLedger>(store,sharedKey,{sessionIds:[],history:{}});
+  // Migrate already-issued rounds from the prior release. Their per-pupil ledgers
+  // exist in this browser, but the shared v1 ledger stopped being updated in that release.
+  const history:FullHistory={...(legacy.history||{})};
+  const enumerable=store as Store&{length?:number;key?:(index:number)=>string|null};
+  if(typeof enumerable.key==='function'&&typeof enumerable.length==='number'){
+    for(let index=0;index<enumerable.length;index++){
+      const key=enumerable.key(index);
+      if(!key?.startsWith(FULL_ACTIVE_KEY+':')||!key.endsWith(':issued-v2'))continue;
+      try{
+        const identity=JSON.parse(key.slice((FULL_ACTIVE_KEY+':').length,-':issued-v2'.length)) as string[];
+        if(Number(identity[2])!==grade)continue;
+        const prior=read<IssueLedger>(store,key,{sessionIds:[],history:{}});
+        for(const [id,record] of Object.entries(prior.history||{})){
+          const old=history[id]||{seen:0,incorrect:0};
+          history[id]={seen:Math.max(old.seen,record.seen),incorrect:0};
+        }
+      }catch{/* Ignore stale storage entries with invalid profiles. */}
+    }
+  }
+  return{sessionIds:[],history};
 }
 function appendIssue(ledger:IssueLedger,session:FullSession):IssueLedger{
   if(ledger.sessionIds.includes(session.id))return ledger;
