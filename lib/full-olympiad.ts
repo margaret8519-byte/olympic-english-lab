@@ -108,7 +108,9 @@ export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSect
   const groups=new Map<string,FullQuestion[]>();
   candidates.forEach(q=>{const id=q.groupId||q.id;groups.set(id,[...(groups.get(id)||[]),q])});
   const last=new Set(lastIds),units:Unit[]=[...groups].map(([id,items])=>{const records=items.map(q=>history[q.id]);const unseen=records.some(record=>!record);const wrong=records.some(record=>record?.incorrect>0);const exactRepeat=items.every(q=>last.has(q.id));return{id,items,priority:(unseen?0:wrong?1:2)+(exactRepeat?3:0),tie:random()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie);
-  const selected:FullQuestion[]=[];for(const unit of units){selected.push(...unit.items);if(selected.length>=target)break}return selected;
+  // Do not pad an incomplete fresh round with already-issued questions: finish the bank first.
+  const fresh=units.filter(unit=>unit.items.some(item=>!history[item.id]?.seen));
+  const selected:FullQuestion[]=[];for(const unit of fresh.length?fresh:units){selected.push(...unit.items);if(selected.length>=target)break}return selected;
 }
 
 const firstFullSectionIndex=(ids:FullSession["questionIds"])=>ids.listening.length?0:1;
@@ -118,7 +120,7 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
   const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id);
   if(variant==="generated"){
     const sets=generatedCompleteSetsForGrade(grade),last=new Set(lastIds);
-    const ranked=sets.map(set=>({set,repeated:[...set.listening.items,...set.reading.items,...set.useOfEnglish.items,...set.writing.items].some(item=>last.has(item.id)),tie:rng()})).sort((a,b)=>Number(a.repeated)-Number(b.repeated)||a.tie-b.tie);
+    const ranked=sets.map(set=>{const items=[...set.listening.items,...set.reading.items,...set.useOfEnglish.items,...set.writing.items];return{set,seenCount:items.filter(item=>history[item.id]?.seen).length,repeated:items.some(item=>last.has(item.id)),tie:rng()}}).sort((a,b)=>a.seenCount-b.seenCount||Number(a.repeated)-Number(b.repeated)||a.tie-b.tie);
     const selected=ranked[0]?.set;
     if(!selected)return{version:1,id,grade,variant,startedAt:now,sectionIndex:0,questionIds:{listening:[],reading:[],"use-of-english":[]},answers:{},writingText:""};
     const ids:FullSession["questionIds"]={
@@ -130,10 +132,13 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
   const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
-  const listeningGroup=selectListeningGroup(listeningGroups,history,lastListeningGroupId,rng);
+  // Restrict the listening pool to unheard recordings until each available group has been issued.
+  const freshListening=listeningGroups.filter(group=>!history[group.id]?.seen);
+  const listeningGroup=selectListeningGroup(freshListening.length?freshListening:listeningGroups,history,freshListening.length?undefined:lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
   for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng).map(q=>q.id);
-  const last=new Set(lastIds),writing=officialWritings.map(task=>{const record=history[task.id];return{task,priority:(!record?0:record.incorrect?1:2)+(last.has(task.id)?3:0),tie:rng()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie)[0]?.task;
+  const freshWriting=officialWritings.filter(task=>!history[task.id]?.seen);
+  const last=new Set(lastIds),writing=(freshWriting.length?freshWriting:officialWritings).map(task=>{const record=history[task.id];return{task,priority:(!record?0:record.incorrect?1:2)+(last.has(task.id)?3:0),tie:rng()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie)[0]?.task;
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
