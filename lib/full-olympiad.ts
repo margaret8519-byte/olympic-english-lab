@@ -103,11 +103,19 @@ export function fullBankForGrade(grade:number,variant:FullVariant="official"){
 }
 
 type Unit={id:string;items:FullQuestion[];priority:number;tie:number};
-export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSection,"writing">,history:FullHistory={},lastIds:string[]=[],target=10,random=Math.random){
+export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSection,"writing">,history:FullHistory={},lastIds:string[]=[],target=10,random=Math.random,sharedHistory:FullHistory={}){
   const candidates=bank.filter(q=>q.section===section&&!q.needsReview&&q.acceptedAnswers.length);
   const groups=new Map<string,FullQuestion[]>();
   candidates.forEach(q=>{const id=q.groupId||q.id;groups.set(id,[...(groups.get(id)||[]),q])});
-  const last=new Set(lastIds),units:Unit[]=[...groups].map(([id,items])=>{const records=items.map(q=>history[q.id]);const unseen=records.some(record=>!record);const wrong=records.some(record=>record?.incorrect>0);const exactRepeat=items.every(q=>last.has(q.id));return{id,items,priority:(unseen?0:wrong?1:2)+(exactRepeat?3:0),tie:random()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie);
+  // Rank unseen for both pupil and browser first; then unseen for pupil; only then personal repeats.
+  const last=new Set(lastIds),units:Unit[]=[...groups].map(([id,items])=>{
+    const locallyFresh=items.some(q=>!history[q.id]?.seen);
+    const globallyFresh=items.some(q=>!sharedHistory[q.id]?.seen);
+    const wrong=items.some(q=>(history[q.id]?.incorrect||0)>0);
+    const exactRepeat=items.every(q=>last.has(q.id));
+    const priority=locallyFresh?(globallyFresh?0:1):(wrong?2:3);
+    return{id,items,priority:priority*10+(locallyFresh?0:Number(exactRepeat)*2),tie:random()};
+  }).sort((a,b)=>a.priority-b.priority||a.tie-b.tie);
   // Do not pad an incomplete fresh round with already-issued questions: finish the bank first.
   const fresh=units.filter(unit=>unit.items.some(item=>!history[item.id]?.seen));
   const selected:FullQuestion[]=[];for(const unit of fresh.length?fresh:units){selected.push(...unit.items);if(selected.length>=target)break}return selected;
@@ -116,7 +124,7 @@ export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSect
 const firstFullSectionIndex=(ids:FullSession["questionIds"])=>ids.listening.length?0:1;
 export function nextFullSectionIndex(session:FullSession,from=session.sectionIndex){for(let index=from+1;index<FULL_SECTION_ORDER.length;index++){const section=FULL_SECTION_ORDER[index];if(section==="writing")return index;if((session.questionIds[section]||[]).length)return index}return from}
 
-export function createFullSession(grade:number,history:FullHistory={},lastIds:string[]=[],random?:()=>number,now=new Date().toISOString(),variant:FullVariant="official"):FullSession{
+export function createFullSession(grade:number,history:FullHistory={},lastIds:string[]=[],random?:()=>number,now=new Date().toISOString(),variant:FullVariant="official",sharedHistory:FullHistory={}):FullSession{
   const id=globalThis.crypto?.randomUUID?.()||`full-${Date.now()}`,rng=random||seededRandom(id);
   if(variant==="generated"){
     const sets=generatedCompleteSetsForGrade(grade),last=new Set(lastIds);
@@ -134,11 +142,15 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
   const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
   // Restrict the listening pool to unheard recordings until each available group has been issued.
   const freshListening=listeningGroups.filter(group=>!history[group.id]?.seen);
-  const listeningGroup=selectListeningGroup(freshListening.length?freshListening:listeningGroups,history,freshListening.length?undefined:lastListeningGroupId,rng);
+  const globallyFreshListening=freshListening.filter(group=>!sharedHistory[group.id]?.seen);
+  const listeningPool=globallyFreshListening.length?globallyFreshListening:freshListening.length?freshListening:listeningGroups;
+  const listeningGroup=selectListeningGroup(listeningPool,history,freshListening.length?undefined:lastListeningGroupId,rng);
   if(listeningGroup)ids.listening=listeningGroup.questions.map(question=>question.id);
-  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng).map(q=>q.id);
+  for(const section of ["reading","use-of-english"] as const)ids[section]=selectFullQuestions(officialObjective,section,history,lastIds,10,rng,sharedHistory).map(q=>q.id);
   const freshWriting=officialWritings.filter(task=>!history[task.id]?.seen);
-  const last=new Set(lastIds),writing=(freshWriting.length?freshWriting:officialWritings).map(task=>{const record=history[task.id];return{task,priority:(!record?0:record.incorrect?1:2)+(last.has(task.id)?3:0),tie:rng()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie)[0]?.task;
+  const globallyFreshWriting=freshWriting.filter(task=>!sharedHistory[task.id]?.seen);
+  const writingPool=globallyFreshWriting.length?globallyFreshWriting:freshWriting.length?freshWriting:officialWritings;
+  const last=new Set(lastIds),writing=writingPool.map(task=>{const record=history[task.id];return{task,priority:(!record?0:record.incorrect?1:2)+(last.has(task.id)?3:0),tie:rng()}}).sort((a,b)=>a.priority-b.priority||a.tie-b.tie)[0]?.task;
   return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,...(listeningGroup?{listeningGroupId:listeningGroup.id}:{}),writingTaskId:writing?.id,answers:{},writingText:""};
 }
 
