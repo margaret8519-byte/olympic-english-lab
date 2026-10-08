@@ -39,8 +39,8 @@ export default function GradeOfficialSection({junior,grade9}:{junior:QuestionSet
  if(!ready)return null;
  // Keep previously stored standalone tasks available, but never silently mistake them
  // for the rotating four-section full olympiad in Grade 10.
- if(grade===10&&!openLegacySection)return <main className="portal training adaptive-page"><AppHeader blue/><div className="full-start"><Link href="/dashboard"><ArrowLeft/> В кабинет</Link><section>
- <BookOpen/><span>10 КЛАСС · ВЫБОР РЕЖИМА</span><h1>{sectionName[section]} — отдельный раздел</h1>
+ if((grade===10||grade===11)&&!openLegacySection)return <main className="portal training adaptive-page"><AppHeader blue/><div className="full-start"><Link href="/dashboard"><ArrowLeft/> В кабинет</Link><section>
+ <BookOpen/><span>{grade} КЛАСС · ВЫБОР РЕЖИМА</span><h1>{sectionName[section]} — отдельный раздел</h1>
  <p>Ты открыл отдельный раздел {sectionName[section]}. Здесь по-прежнему используется прежний банк заданий. Он не является новой полной олимпиадной тренировкой.</p>
  <p><strong>Новая полная тренировка</strong> собирает Listening, Reading, Use of English и Writing в один вариант из заданий прошлых лет и новых авторских материалов. Для следующей попытки выбираются ещё не встречавшиеся блоки.</p>
  <div className="full-sequence"><span><b>1</b>Listening</span><span><b>2</b>Reading</span><span><b>3</b>Use of English</span><span><b>4</b>Writing</span></div>
