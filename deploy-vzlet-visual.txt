@@ -1,6 +1,6 @@
-Deploy integrated Grade 10 full training · 2026-10-08
-Source: github-pages-static-test @ 8dd191db8018433c5543192e7401222556072f47
-PR: #30
-Main route: /training/full-olympiad/
-Official historical archive: /training/official-archive/
-No separate Challenge 01 card. Grades 7-9, 11 unchanged.
+Deploy mixed Grade 10 olympiad full training · 2026-10-08
+Source: github-pages-static-test @ b48294fada5d2b4e780ebbf92ee5869eb0e831f9
+PR: #31
+Main route /training/full-olympiad/ uses official archive + original generated question pools with rotation.
+Historical official archive remains /training/official-archive/.
+Other grades unchanged. Static pre-generated bank, no live AI generation.
