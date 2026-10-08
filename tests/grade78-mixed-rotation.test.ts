@@ -19,7 +19,7 @@ for(const grade of [7,8]){
    const questions=bank.objective.filter(q=>q.section===section&&!q.needsReview&&q.acceptedAnswers.length>0);
    assert.ok(questions.some(q=>q.source==="official-vsosh-vzlet"&&q.year<=2025),section+" no official past-year tasks");
    assert.ok(questions.some(q=>q.source==="original-olympic-english-lab"&&q.year===2026),section+" no authored task");
-   assert.ok(questions.every(q=>q.grade==="7-8"||q.grade===7||q.grade===8),section+" wrong grade");
+   assert.ok(questions.every(q=>q.grade==="7-8"),section+" wrong grade");
   }
   assert.ok(bank.listeningGroups.some(g=>g.source==="official-vsosh-vzlet"));
   assert.ok(bank.listeningGroups.some(g=>g.source==="original-olympic-english-lab"));
