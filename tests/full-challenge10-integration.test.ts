@@ -27,3 +27,15 @@ test("Original complete paper is retained as a reviewable stable archive",()=>{
  assert.equal(challenge10.sections.length,4);
  assert.equal(Object.keys(challenge10.keys).length,60);
 });
+
+test("Grade 10 standalone sections do not silently display the old bank",()=>{
+ const gate=source("components/training/GradeOfficialSection.tsx");
+ assert.match(gate,/grade===10&&!openLegacySection/);
+ assert.match(gate,/href="\/training\/full-olympiad"/);
+ assert.match(gate,/прежний банк/);
+ assert.match(gate,/setOpenLegacySection\(true\)/);
+ const sidebar=source("components/Sidebar.tsx");
+ assert.match(sidebar,/n\+" · отдельно"/);
+ const dashboard=source("app/dashboard/page.tsx");
+ assert.match(dashboard,/Это отдельные упражнения из прежнего банка/);
+});
