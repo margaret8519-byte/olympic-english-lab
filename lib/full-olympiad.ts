@@ -128,7 +128,7 @@ export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSect
   // Rank unseen for both pupil and browser first; then unseen for pupil; only then personal repeats.
   // Some imported year sets contain the same wording under different IDs.
   // Treat identical text AND source passage as already seen, not as a fresh task.
-  const contentKey=(q:FullQuestion)=>[q.section,q.text,q.passage||""].join("|").normalize("NFKC").toLocaleLowerCase("en").replace(/\s+/g," ").trim();
+  const contentKey=(q:FullQuestion)=>q.text?.trim()?[q.section,q.text,q.passage||""].join("|").normalize("NFKC").toLocaleLowerCase("en").replace(/\s+/g," ").trim():q.id;
   const pupilSeenText=new Set(candidates.filter(q=>history[q.id]?.seen).map(contentKey));
   const browserSeenText=new Set(candidates.filter(q=>sharedHistory[q.id]?.seen).map(contentKey));
   const last=new Set(lastIds),units:Unit[]=[...groups].map(([id,items])=>{
