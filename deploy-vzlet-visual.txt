@@ -1,1 +1,3 @@
-Deploy refined Vzlet heading — 2026-09-30
+Deploy per-student no-repeat training rotation — 2026-10-08
+Source: github-pages-static-test @ 0c713658deb1cd916e511b9e6c8900b66d89eb34
+PR: #26
