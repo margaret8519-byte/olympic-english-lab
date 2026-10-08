@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {fullBankForGrade,resolveFullListeningGroup,resolveSessionQuestions,resolveSessionWriting} from "../lib/full-olympiad.ts";
+import {fullBankForGrade,resolveFullListeningGroup,resolveSessionQuestions,resolveSessionWriting,selectFullQuestions,type FullQuestion} from "../lib/full-olympiad.ts";
 import {beginFullTraining,fullGlobalIssuedKey,fullProfileKey} from "../lib/full-training-storage.ts";
 import {generatedComplete78} from "../data/questions/generated-complete-78-2026.ts";
 
@@ -90,3 +90,39 @@ test("reordering four author options also reorders the correct answer, reducing 
   for(const key of ["a","b","c","d"])assert.ok((counts.get(key)||0)>=15,"Answer bias in Grade "+grade+" at "+key);
  }
 });
+
+
+test("Mixed sections do not reissue seen questions from a partly new text group",()=>{
+ const make=(id:string,groupId:string,text:string):FullQuestion=>({
+  id,groupId,section:"reading",text,passage:"One common story",acceptedAnswers:["a"],options:["A True","B False"],needsReview:false
+ } as FullQuestion);
+ const a=make("a","passage","Question A"),b=make("b","passage","Question B"),c=make("c","second","Question C");
+ const history={a:{seen:1,incorrect:0}};
+ const selected=selectFullQuestions([a,b,c],"reading",history,[],10,()=>0.5,{},true);
+ assert.deepEqual(new Set(selected.map(q=>q.id)),new Set(["b","c"]),"Reusing an old question merely because the passage still has unused questions");
+ assert.ok(selected.every(q=>q.passage==="One common story"),"The shared reading context must remain accessible");
+ const officialLegacy=selectFullQuestions([a,b,c],"reading",history,[],10,()=>0.5);
+ assert.ok(officialLegacy.some(q=>q.id==="a"),"Do not silently change the historic official entire-passage selection");
+});
+
+for(const grade of [7,8]){
+ test("Grade "+grade+" long repeat practice uses all genuinely unseen text before recycling",()=>{
+   const store=storage(),profile=makeProfile(grade),bank=fullBankForGrade(grade,"mixed"),seen=new Set<string>();
+   for(let attempt=0;attempt<12;attempt++){
+     const round=beginFullTraining(store,grade,"mixed",profile,()=>0.5);
+     const questions=resolveSessionQuestions(round);
+     for(const section of ["reading","use-of-english"] as const){
+       const eligible=bank.objective.filter(q=>q.section===section&&!q.needsReview&&q.acceptedAnswers.length);
+       const unique=new Set(eligible.map(fingerprint));
+       const hadUnused=[...unique].some(q=>!seen.has(q));
+       const current=questions.filter(q=>q.section===section);
+       if(hadUnused){
+         assert.ok(current.length>0,"Empty "+section+" even though unused tasks remain");
+         for(const q of current)assert.equal(seen.has(fingerprint(q)),false,
+           "Grade "+grade+" attempt "+(attempt+1)+": repeated "+section+" "+q.id+" before personal bank exhausted");
+       }
+       for(const q of current)seen.add(fingerprint(q));
+     }
+   }
+ });
+}
