@@ -1,3 +1,5 @@
-Deploy official shared + personal no-repeat rotation — 2026-10-08
-Source: github-pages-static-test @ c721cd2640ba5a8647c07a68139b9bd57563d314
-PR: #27
+Deploy approved Grade 10 interactive challenge preview — 2026-10-08
+Source: github-pages-static-test @ 70108b701c327501e41c4f2cb545b933fa6a3b38
+PR: #28
+New route: /training/challenge-10-preview/
+Original official and author training routes unchanged.
