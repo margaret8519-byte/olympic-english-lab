@@ -1,0 +1,31 @@
+name: Grade 10 Challenge Preview Check
+on:
+  pull_request:
+    branches:
+      - github-pages-static-test
+    paths:
+      - 'app/training/challenge-10-preview/**'
+      - 'data/challenge-10-preview.ts'
+      - 'tests/challenge-10-preview.test.ts'
+      - '.github/workflows/challenge-10-preview-check.yml'
+permissions:
+  contents: read
+jobs:
+  preview-qa:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAGES: "true"
+      NEXT_PUBLIC_BASE_PATH: /olympic-english-lab
+      NEXT_PUBLIC_SUPABASE_URL: https://mrvanjghovfpedcdqzzb.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_WiABeNwFKOAVrPBBIwV7kg_wtTnWfWK
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --experimental-strip-types --test tests/challenge-10-preview.test.ts
+      - run: npx eslint app/training/challenge-10-preview/page.tsx data/challenge-10-preview.ts tests/challenge-10-preview.test.ts
+      - run: npm run build
+      - run: test -f out/training/challenge-10-preview/index.html
