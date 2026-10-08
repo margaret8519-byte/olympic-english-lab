@@ -126,9 +126,14 @@ export function selectFullQuestions(bank:FullQuestion[],section:Exclude<FullSect
   const groups=new Map<string,FullQuestion[]>();
   candidates.forEach(q=>{const id=q.groupId||q.id;groups.set(id,[...(groups.get(id)||[]),q])});
   // Rank unseen for both pupil and browser first; then unseen for pupil; only then personal repeats.
+  // Some imported year sets contain the same wording under different IDs.
+  // Treat identical text AND source passage as already seen, not as a fresh task.
+  const contentKey=(q:FullQuestion)=>[q.section,q.text,q.passage||""].join("|").normalize("NFKC").toLocaleLowerCase("en").replace(/\s+/g," ").trim();
+  const pupilSeenText=new Set(candidates.filter(q=>history[q.id]?.seen).map(contentKey));
+  const browserSeenText=new Set(candidates.filter(q=>sharedHistory[q.id]?.seen).map(contentKey));
   const last=new Set(lastIds),units:Unit[]=[...groups].map(([id,items])=>{
-    const locallyFresh=items.some(q=>!history[q.id]?.seen);
-    const globallyFresh=items.some(q=>!sharedHistory[q.id]?.seen);
+    const locallyFresh=items.some(q=>!history[q.id]?.seen&&!pupilSeenText.has(contentKey(q)));
+    const globallyFresh=items.some(q=>!sharedHistory[q.id]?.seen&&!browserSeenText.has(contentKey(q)));
     const wrong=items.some(q=>(history[q.id]?.incorrect||0)>0);
     const exactRepeat=items.every(q=>last.has(q.id));
     const priority=locallyFresh?(globallyFresh?0:1):(wrong?2:3);
