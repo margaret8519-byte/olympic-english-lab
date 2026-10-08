@@ -110,18 +110,18 @@ export default function Grade10Preview(){
  const categoryScore=(start:number)=>Array.from({length:20},(_,i)=>i+start).reduce((sum,n)=>sum+(norm(state.answers[n]||"")===norm(String(challenge10.keys[String(n) as keyof typeof challenge10.keys]))?1:0),0);
  function answer(n:number,value:string){setState(s=>({...s,answers:{...s.answers,[n]:value}}))}
  function changeSection(next:number){setState(s=>({...s,section:next}));window.scrollTo({top:0,behavior:"smooth"})}
- function restart(){if(window.confirm("Начать этот же демонстрационный вариант сначала? Сохранённые ответы будут очищены.")){setState(initial);window.scrollTo({top:0})}}
+ function restart(){if(window.confirm("Пройти тот же полный вариант заново? Сохранённые ответы будут очищены.")){setState(initial);window.scrollTo({top:0})}}
  if(loadedKey!==storageKey)return <main className={styles.preview}>Загружаем тренировку…</main>;
  return <main className={styles.preview}>
-  <div className={styles.back}><Link href="/dashboard"><ArrowLeft size={17}/> В кабинет</Link><span>OLYMPIC ENGLISH LAB / DEMO</span></div>
+  <div className={styles.back}><Link href="/dashboard"><ArrowLeft size={17}/> В кабинет</Link><span>OLYMPIC ENGLISH LAB / FULL TRAINING</span></div>
   <header className={styles.hero}>
-    <div className={styles.heroCopy}><span className={styles.kicker}>GRADE 10 • MUNICIPAL-STAGE STYLE • B2–B2+</span><h1>The Stories<br/><em>We Leave Behind</em></h1><p>Полноценный авторский олимпиадный вариант: 60 заданий, три скрипта аудирования и творческое Writing. Это не официальная работа «Взлёта».</p><div className={styles.pills}><span>120 минут</span><span>60 заданий</span><span>Writing: +20 баллов</span><span>Черновик для проверки</span></div></div>
+    <div className={styles.heroCopy}><span className={styles.kicker}>GRADE 10 • MUNICIPAL-STAGE STYLE • B2–B2+</span><h1>The Stories<br/><em>We Leave Behind</em></h1><p>Полная олимпиадная тренировка для 10 класса: 60 заданий в разных форматах, Listening, Reading, Use of English и творческое Writing. Авторский комплект создан по образцу муниципального этапа «Взлёт».</p><div className={styles.pills}><span>120 минут</span><span>60 заданий</span><span>Writing: +20 баллов</span><span>Основная тренировка · вариант 01</span></div></div>
     <div className={styles.heroStat}><Trophy size={35}/><strong>{answered}<span>/60</span></strong><small>ответов заполнено</small><div className={styles.track}><div style={{width:answered/60*100+"%"}}/></div></div>
   </header>
-  <div className={styles.notice}><CheckCircle2 size={19}/> Это один фиксированный пробный вариант, а не бесконечный генератор. Ответы сохраняются в текущем браузере отдельно для каждого профиля. В Listening используется синтез речи браузера; полноценные аудиозаписи будут добавлены позже.</div>
+  <div className={styles.notice}><CheckCircle2 size={19}/> Это основной полный формат подготовки для 10 класса. Пока подготовлен один авторский вариант: после его завершения следующая попытка повторит те же задания. Ответы сохраняются в этом браузере по профилю. Listening использует временную озвучку браузера.</div>
   <div className={styles.tabs}>{sections.map((name,i)=><button key={name} className={section===i?styles.tabActive:""} onClick={()=>changeSection(i)}><span>0{i+1}</span>{name}<small>{i===3?count+" слов":Object.keys(state.answers).filter(k=>+k>=i*20+1&&+k<=i*20+20&&state.answers[k]?.trim()).length+"/20"}</small></button>)}</div>
   {state.completed?<section className={styles.results}>
-    <Trophy size={37}/><h2>Результат тренировочного варианта</h2><p className={styles.score}>{score}<span> / 60</span></p><p>Это автоматический результат по Listening, Reading и Use of English. Writing оценивает учитель отдельно (до 20 баллов). Максимум всей работы — 80 баллов.</p>
+    <Trophy size={37}/><h2>Результат полной тренировки</h2><p className={styles.score}>{score}<span> / 60</span></p><p>Это автоматический результат по Listening, Reading и Use of English. Writing оценивает учитель отдельно (до 20 баллов). Максимум всей работы — 80 баллов.</p>
     <div className={styles.resultGrid}>{(["Listening","Reading","Use of English"] as const).map((name,i)=><div key={name}><small>{name}</small><strong>{categoryScore(i*20+1)} / 20</strong></div>)}</div>
     <details className={styles.keyDetails}><summary>Посмотреть ответы и сравнить с ключом</summary><div className={styles.checkGrid}>{Array.from({length:60},(_,i)=>{const n=i+1,correct=String(challenge10.keys[String(n) as keyof typeof challenge10.keys]),given=state.answers[n]||"";return <div key={n} className={norm(given)===norm(correct)?styles.correct:styles.incorrect}><b>{n}.</b> {given||"—"} <span>→ {correct}</span></div>})}</div></details>
     <div className={styles.navButtons}><button onClick={()=>setState(s=>({...s,completed:false,section:3}))}>Вернуться к Writing</button><button onClick={restart}><RefreshCcw size={16}/> Пройти этот вариант заново</button></div>
@@ -147,6 +147,6 @@ export default function Grade10Preview(){
     </article>
     <aside className={styles.sidebar}><div className={styles.sideCard}><h3><BookOpen size={17}/> Навигация</h3><p>Ответы сохраняются автоматически. Можно возвращаться к разделам и исправлять их до просмотра результата.</p><div className={styles.progressBig}>{answered}/60 <span>вопросов заполнено</span></div><div className={styles.track}><div style={{width:answered/60*100+"%"}}/></div>{sections.map((s,i)=><button className={section===i?styles.sideSelected:""} key={s} onClick={()=>changeSection(i)}>{s}<ArrowRight size={15}/></button>)}</div><div className={styles.sideNote}><b>Writing</b><p>Текст сохраняется только на этом устройстве. Автоматическая проверка не заменяет оценку учителя.</p></div></aside>
   </div>}
-  <footer className={styles.footer}>OLYMPIC ENGLISH LAB · Original training material · Not an official Vzlyot examination · Demo 01</footer>
+  <footer className={styles.footer}>OLYMPIC ENGLISH LAB · Original training material · Not an official Vzlyot examination · Full Training · Set 01</footer>
  </main>;
 }
