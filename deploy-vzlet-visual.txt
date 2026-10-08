@@ -1,6 +1,4 @@
-Deploy mixed Grade 10 olympiad full training · 2026-10-08
-Source: github-pages-static-test @ b48294fada5d2b4e780ebbf92ee5869eb0e831f9
-PR: #31
-Main route /training/full-olympiad/ uses official archive + original generated question pools with rotation.
-Historical official archive remains /training/official-archive/.
-Other grades unchanged. Static pre-generated bank, no live AI generation.
+Deploy clear Grade 10 full-versus-standalone navigation · 2026-10-08
+Source: github-pages-static-test @ 530daeffac42975eb377552dc9ceeccd874ea8a7
+PR: #32
+Students in Grade 10 entering old standalone Reading/Listening/Use of English/Writing see a gate with a prominent link to new mixed full training. Existing standalone practice retained explicitly.
