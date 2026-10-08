@@ -39,3 +39,17 @@ test("Grade 10 standalone sections do not silently display the old bank",()=>{
  const dashboard=source("app/dashboard/page.tsx");
  assert.match(dashboard,/Это отдельные упражнения из прежнего банка/);
 });
+
+test("full training never highlights a standalone skill tab and offers explicit fresh versus resume",()=>{
+ const page=source("components/training/FullOlympiadTraining.tsx");
+ const menu=source("components/Sidebar.tsx");
+ assert.ok(page.includes('<Sidebar active="Полная тренировка" fullTraining/>'));
+ assert.ok(!page.includes("<Sidebar active={labels[section]}/>"));
+ assert.match(page,/setResumeChoice\(Boolean\(resumed\)\)/);
+ assert.match(page,/if\(resumeChoice&&session&&!session.completedAt\)/);
+ assert.match(page,/Продолжить с сохранёнными ответами/);
+ assert.match(page,/Начать новый вариант/);
+ assert.match(page,/onClick=\{startAnother\}/);
+ assert.match(menu,/fullTraining\?items\.filter/);
+ assert.match(menu,/Полная тренировка/);
+});
