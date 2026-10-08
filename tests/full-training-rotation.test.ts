@@ -75,8 +75,9 @@ test('reading groups are kept whole, and seen questions never pad a partly fresh
 
 test('every supported grade uses all unseen official tasks before reissuing them',()=>{
  for(const grade of [7,8,9,10,11]){
-   const profile={...anna,grade:String(grade)},store=storage(),bank=fullBankForGrade(grade);
+   const profile={...anna,grade:String(grade)},bank=fullBankForGrade(grade);
    for(const section of ['reading','use-of-english'] as const){
+     const store=storage();
      const all=new Set(bank.objective.filter(q=>q.source==='official-vsosh-vzlet'&&q.section===section&&!q.needsReview&&q.acceptedAnswers.length).map(q=>q.id));
      if(!all.size)continue;
      const seen=new Set<string>();
