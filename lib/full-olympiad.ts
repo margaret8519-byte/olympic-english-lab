@@ -87,13 +87,18 @@ function generatedFullBankForGrade(grade:number){
 
 export function fullBankForGrade(grade:number,variant:FullVariant="official"):{objective:FullQuestion[];listeningGroups:ListeningGroup[];writing:FullQuestion;writings:FullQuestion[]}{
   if(variant==="generated")return generatedFullBankForGrade(grade);
-  if(variant==="mixed"&&grade===10){
-    const official=fullBankForGrade(10,"official"),sets=generatedCompleteSetsForGrade(10);
-    const originalObjective=[...sets.flatMap(set=>[...set.reading.items,...set.useOfEnglish.items]),...approved10Questions.filter(q=>q.section==="reading"||q.section==="use-of-english")].map(mixedAuthorOptions) as FullQuestion[];
-    const originalListening=listeningGroupsFromSets(sets.map(set=>set.listening),10);
+  if(variant==="mixed"&&(grade===10||grade===11)){
+    const official=fullBankForGrade(grade,"official"),sets=generatedCompleteSetsForGrade(grade);
+    // Only the approved Grade 10 Challenge 01 exists; never give Grade 10 papers to Grade 11.
+    const approvedObjective=grade===10?approved10Questions.filter(q=>q.section==="reading"||q.section==="use-of-english"):[];
+    const approvedAudio=grade===10?approved10Listening:[];
+    const approvedWritings=grade===10?[approved10Writing as FullQuestion]:[];
+    const originalObjective=[...sets.flatMap(set=>[...set.reading.items,...set.useOfEnglish.items]),...approvedObjective].map(mixedAuthorOptions) as FullQuestion[];
+    const originalListening=listeningGroupsFromSets(sets.map(set=>set.listening),grade);
     const originalWriting=sets.flatMap(set=>set.writing.items) as FullQuestion[];
-    const writings=[...official.writings,...originalWriting,approved10Writing as FullQuestion];
-    return{objective:[...official.objective,...originalObjective],listeningGroups:[...official.listeningGroups,...originalListening,...approved10Listening],writing:writings[0],writings};
+    const writings=[...official.writings,...originalWriting,...approvedWritings];
+    // Keep official and author sources labelled and independently identifiable across sessions.
+    return{objective:[...official.objective,...originalObjective],listeningGroups:[...official.listeningGroups,...originalListening,...approvedAudio],writing:writings[0],writings};
   }
   const shared2025=grade===7||grade===8?grade782025Sets:grade===9||grade===10?official2025ForGrade(grade):grade===11?grade11Official2025:null;
   const baseObjective:FullQuestion[]=grade===10||grade===11
