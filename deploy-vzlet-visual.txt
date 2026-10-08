@@ -1,5 +1,5 @@
-Deploy Grade 9 unified mixed Olympiad training — 2026-10-08
-Source: github-pages-static-test @ eb219991fdd484c019003ed0693f61ef0012b3e3
-PR: #35
-Grade 9 main full training /training/full-olympiad/ now uses verified 2023-2025 official tasks with original authored 2026 sets and first-unseen rotation. Saved sessions resume/new controls and unified sidebar; standalone practice remains separate.
-Grades 10-11 retain mixed mode; Grades 7-8 unchanged. No live AI generation, bank is finite.
+Deploy Grades 7 and 8 unified mixed Olympiad full training — 2026-10-08
+Source: github-pages-static-test @ a50ee5053cdc9b0d20ecccb0a4331210c8c248ec
+PR: #36
+Full route /training/full-olympiad/ now serves joint 7–8 Vzlyot archive papers from 2022 and 2025 plus 5 original 2026 author variants, with independent Grade 7 and 8 history, fresh-first question rotation, resume/new controls and focused sidebar.
+Grades 9–11 remain in mixed mode. Official archive preserved. Static, finite question bank; no live AI generation.
