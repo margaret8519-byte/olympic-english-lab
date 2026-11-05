@@ -24,7 +24,7 @@ import {validatedListeningGroupsForGrade} from "./listening-registry.ts";
 export const FULL_SECTION_ORDER=["listening","reading","use-of-english","writing"] as const;
 export type FullSection=typeof FULL_SECTION_ORDER[number];
 export type FullQuestion=QuestionBankItem&{options:string[]};
-export type FullVariant="official"|"generated";
+export type FullVariant="official"|"generated"|"vzlet-2025-grade-11";
 export type FullHistory=Record<string,{seen:number;incorrect:number}>;
 export type FullSession={version:1;id:string;grade:number;variant?:FullVariant;startedAt:string;sectionIndex:number;questionIds:Record<Exclude<FullSection,"writing">,string[]>;listeningGroupId?:string;writingTaskId?:string;answers:Record<string,string>;writingText:string;completedAt?:string;writingStatus?:"pending"|"reviewed"|"local";writingReview?:{score:number;maxScore:number;comment?:string|null}};
 export const FULL_ACTIVE_KEY="olympic-full-olympiad-active-v1";
@@ -83,6 +83,16 @@ function generatedFullBankForGrade(grade:number){
 
 export function fullBankForGrade(grade:number,variant:FullVariant="official"){
   if(variant==="generated")return generatedFullBankForGrade(grade);
+  if(variant==="vzlet-2025-grade-11"){
+    const sets=grade11Official2025;
+    const writings=grade11Writing2025.items;
+    return {
+      objective:[...sets.reading.items,...sets["use-of-english"].items],
+      listeningGroups:listeningGroupsFromSets([sets.listening],11),
+      writing:writings[0],
+      writings,
+    };
+  }
   const shared2025=grade===7||grade===8?grade782025Sets:grade===9||grade===10?official2025ForGrade(grade):grade===11?grade11Official2025:null;
   const baseObjective:FullQuestion[]=grade===10||grade===11
     ? objectiveBankForSeniorGrade(grade).map(q=>({...q,groupId:q.section==="listening"&&!q.groupId?`g${grade}-2024-listening-audio`:q.groupId}) as FullQuestion)
@@ -123,6 +133,18 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
       "use-of-english":selected.useOfEnglish.items.map(question=>question.id)
     };
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
+  }
+  if(variant==="vzlet-2025-grade-11"){
+    const {objective,listeningGroups:[listening],writing}=fullBankForGrade(11,variant);
+    return {
+      version:1,id,grade:11,variant,startedAt:now,sectionIndex:0,
+      questionIds:{
+        listening:listening.questions.map(question=>question.id),
+        reading:objective.filter(question=>question.section==="reading").map(question=>question.id),
+        "use-of-english":objective.filter(question=>question.section==="use-of-english").map(question=>question.id),
+      },
+      listeningGroupId:listening.id,writingTaskId:writing.id,answers:{},writingText:"",
+    };
   }
   const {objective,listeningGroups,writings}=fullBankForGrade(grade,variant),ids:FullSession["questionIds"]={listening:[],reading:[],"use-of-english":[]},lastListeningGroupId=lastIds.find(value=>listeningGroups.some(group=>group.id===value));
   const officialObjective=objective.filter(question=>question.source==="official-vsosh-vzlet"),officialWritings=writings.filter(question=>question.source==="official-vsosh-vzlet");
