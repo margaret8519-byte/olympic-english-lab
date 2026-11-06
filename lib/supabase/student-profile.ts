@@ -14,6 +14,33 @@ export function getClassJoinErrorMessage(error:unknown){
   if(diagnostic.includes("failed to fetch")||diagnostic.includes("network")||diagnostic.includes("fetcherror"))return"Не удалось связаться с сервером.";
   return message||"Не удалось присоединиться к классу.";
 }
+export class StudentProfileConflict extends Error {
+  constructor() {
+    super("В этом браузере открыт другой ученический профиль. Нажмите «Сменить ученика».");
+  }
+}
+
+const studentStorageKeys = new Set([
+  "studentProfile", "studentProfileSync", "studentClass", "questionHistory",
+  "recentQuestionIds", "trainingAttempts", "pendingCloudSync",
+]);
+const studentStoragePrefixes = [
+  "olympic-full-", "olympic-standalone-", "olympic-writing-",
+  "olympic-speaking-", "full-vzlet-",
+];
+
+export async function endStudentSession() {
+  const { error } = await createClient().auth.signOut({ scope: "local" });
+  if (error && error.name !== "AuthSessionMissingError") throw error;
+
+  for (const key of Object.keys(localStorage)) {
+    if (studentStorageKeys.has(key) || studentStoragePrefixes.some(prefix => key.startsWith(prefix))) {
+      localStorage.removeItem(key);
+    }
+  }
+  localStorage.setItem("studentSessionChange", crypto.randomUUID());
+}
+
 export async function syncStudentProfile(profile: StudentProfile,joinCode="") {
   const supabase = createClient();
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -38,19 +65,29 @@ export async function syncStudentProfile(profile: StudentProfile,joinCode="") {
   }
   if(process.env.NODE_ENV==="development")console.info("[Student Join] auth user:",user?"есть":"нет");
 
-  const { error: profileError } = await supabase.from("students").upsert({
-    id: user.id,
-    first_name: profile.firstName,
-    last_name: profile.lastName,
-    grade: Number(profile.grade),
-    class_letter: profile.classLetter || null,
-  });
-  if (profileError) {
-    if(process.env.NODE_ENV==="development")console.info("[Student Join] student upsert: error");
-    if (process.env.NODE_ENV === "development") console.error("[Supabase student upsert error]:", profileError.message, profileError);
-    throw profileError;
+  const { data: existing, error: lookupError } = await supabase.from("students")
+    .select("first_name,last_name,grade")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+  if (existing) {
+    const normalize = (value: string) => value.trim().toLowerCase();
+    if (normalize(existing.first_name) !== normalize(profile.firstName)
+      || normalize(existing.last_name) !== normalize(profile.lastName)
+      || existing.grade !== Number(profile.grade)) {
+      throw new StudentProfileConflict();
+    }
+  } else {
+    const { error } = await supabase.from("students").insert({
+      id: user.id,
+      first_name: profile.firstName,
+      last_name: profile.lastName,
+      grade: Number(profile.grade),
+      class_letter: profile.classLetter || null,
+    });
+    if (error) throw error;
   }
-  if(process.env.NODE_ENV==="development")console.info("[Student Join] student upsert: success");
+
   let joinedClass:JoinedClass|null=null;
   const normalizedCode=joinCode.trim().toUpperCase();
   if(normalizedCode){
