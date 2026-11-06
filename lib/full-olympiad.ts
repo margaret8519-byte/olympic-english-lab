@@ -24,7 +24,18 @@ import {validatedListeningGroupsForGrade} from "./listening-registry.ts";
 export const FULL_SECTION_ORDER=["listening","reading","use-of-english","writing"] as const;
 export type FullSection=typeof FULL_SECTION_ORDER[number];
 export type FullQuestion=QuestionBankItem&{options:string[]};
-export type FullVariant="official"|"generated"|"vzlet-2025-grade-11";
+export type FixedFullVariant = "vzlet-2025-grade-78" | "vzlet-2025-grade-910" | "vzlet-2025-grade-11";
+export type FullVariant = "official" | "generated" | FixedFullVariant;
+
+export const fixedFullVariants = {
+  "vzlet-2025-grade-78": { grades: [7, 8], label: "7–8 классы", task: "4473_1764686259", key: "4482_1764686555", minutes: [15, 25, 20, 30], listeningPoints: 15 },
+  "vzlet-2025-grade-910": { grades: [9, 10], label: "9–10 классы", task: "4474_1764686276", key: "4483_1764686578", minutes: [20, 25, 25, 50], listeningPoints: 20, crosswordPage: 8 },
+  "vzlet-2025-grade-11": { grades: [11], label: "11 класс", task: "4475_1764686292", key: "4484_1764686590", minutes: [20, 25, 25, 50], listeningPoints: 20, crosswordPage: 7 },
+} satisfies Record<FixedFullVariant, { grades: number[]; label: string; task: string; key: string; minutes: number[]; listeningPoints: number; crosswordPage?: number }>;
+
+export function fixedFullVariantForGrade(grade: number) {
+  return (Object.keys(fixedFullVariants) as FixedFullVariant[]).find(variant => fixedFullVariants[variant].grades.includes(grade));
+}
 export type FullHistory=Record<string,{seen:number;incorrect:number}>;
 export type FullSession={version:1;id:string;grade:number;variant?:FullVariant;startedAt:string;sectionIndex:number;questionIds:Record<Exclude<FullSection,"writing">,string[]>;listeningGroupId?:string;writingTaskId?:string;answers:Record<string,string>;writingText:string;completedAt?:string;writingStatus?:"pending"|"reviewed"|"local";writingReview?:{score:number;maxScore:number;comment?:string|null}};
 export const FULL_ACTIVE_KEY="olympic-full-olympiad-active-v1";
@@ -83,12 +94,13 @@ function generatedFullBankForGrade(grade:number){
 
 export function fullBankForGrade(grade:number,variant:FullVariant="official"){
   if(variant==="generated")return generatedFullBankForGrade(grade);
-  if(variant==="vzlet-2025-grade-11"){
-    const sets=grade11Official2025;
-    const writings=grade11Writing2025.items;
+  if(variant!=="official"){
+    const sets=variant==="vzlet-2025-grade-78"?grade782025Sets:variant==="vzlet-2025-grade-910"?official2025ForGrade(grade===10?10:9):grade11Official2025;
+    const writing=variant==="vzlet-2025-grade-78"?grade78Writing2025:variant==="vzlet-2025-grade-910"?(grade===10?grade10Writing2025:grade9Writing2025):grade11Writing2025;
+    const writings=writing.items;
     return {
       objective:[...sets.reading.items,...sets["use-of-english"].items],
-      listeningGroups:listeningGroupsFromSets([sets.listening],11),
+      listeningGroups:listeningGroupsFromSets([sets.listening],grade),
       writing:writings[0],
       writings,
     };
@@ -134,10 +146,10 @@ export function createFullSession(grade:number,history:FullHistory={},lastIds:st
     };
     return{version:1,id,grade,variant,startedAt:now,sectionIndex:firstFullSectionIndex(ids),questionIds:ids,listeningGroupId:selected.listening.id,writingTaskId:selected.writing.items[0]?.id,answers:{},writingText:""};
   }
-  if(variant==="vzlet-2025-grade-11"){
-    const {objective,listeningGroups:[listening],writing}=fullBankForGrade(11,variant);
+  if(variant!=="official"){
+    const {objective,listeningGroups:[listening],writing}=fullBankForGrade(grade,variant);
     return {
-      version:1,id,grade:11,variant,startedAt:now,sectionIndex:0,
+      version:1,id,grade,variant,startedAt:now,sectionIndex:0,
       questionIds:{
         listening:listening.questions.map(question=>question.id),
         reading:objective.filter(question=>question.section==="reading").map(question=>question.id),
